@@ -292,7 +292,7 @@ export default function App() {
 
         {/* ENTRENA CONMIGO */}
         <section aria-labelledby="cta-title" className="cta-card fade-up">
-          <h2 id="cta-title">💪 Entrena Conmigo</h2>
+          <h2 id="cta-title">Entrena Conmigo</h2>
           <p>Planificación científica personalizada para triatletas de todos los niveles</p>
           <div className="services-grid">
             {[
@@ -319,7 +319,7 @@ export default function App() {
             className="cta-btn"
             aria-label="Contactar con Pablo Iglesias Navarrete por WhatsApp para empezar a entrenar"
           >
-            🚀 Empezar a Entrenar Hoy
+            Empezar a Entrenar Hoy
           </a>
         </section>
 
