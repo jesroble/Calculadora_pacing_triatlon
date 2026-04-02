@@ -43,8 +43,8 @@ const FAQS = [
     a: "En Ironman Full el IF recomendado es considerablemente más bajo (0.60–0.72) que en 70.3 (0.66–0.85), ya que la distancia es el doble y hay que conservar energía para la maratón final de 42 km."
   },
   {
-    q: "¿Qué es el FTP y cómo lo mido?",
-    a: "El FTP (Functional Threshold Power) es la máxima potencia media que puedes sostener durante una hora. Se estima con un test de 20 minutos tomando el 95% de la potencia media, o con tests de 8 minutos. Es el parámetro más importante para planificar el pacing en ciclismo."
+    q: "¿Qué es el FTP?",
+    a: "FTP (Functional Threshold Power) es la potencia máxima, medida en vatios, que un ciclista puede mantener de forma constante durante aproximadamente una hora. Se utiliza como referencia para evaluar el rendimiento y establecer zonas de entrenamiento."
   }
 ]
 
