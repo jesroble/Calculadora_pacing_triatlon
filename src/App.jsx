@@ -91,7 +91,7 @@ export default function App() {
         </h1>
         <p className="hero-sub fade-up delay-2">Ironman 70.3 · Ironman Full</p>
         <p className="hero-author fade-up delay-2">
-          Creada por <strong>Pablo Iglesias Navarrete</strong><br />
+          Creada por <strong><a href="https://entrenador-deportes-cicl-h5zi3vi.gamma.site/#card-9bg9tkkaby8ezxr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none' }}>Pablo Iglesias Navarrete</a></strong><br />
           Entrenador Nacional de Triatlón y Natación
         </p>
         <p className="hero-bizum fade-up delay-2">
@@ -313,13 +313,14 @@ export default function App() {
             ))}
           </div>
           <a
-            href="https://wa.me/34600254690"
+            href="https://entrenador-deportes-cicl-h5zi3vi.gamma.site/#card-9bg9tkkaby8ezxr"
             target="_blank"
             rel="noopener noreferrer"
             className="cta-btn"
-            aria-label="Contactar con Pablo Iglesias Navarrete por WhatsApp para empezar a entrenar"
+            style={{ background: 'var(--green)', marginTop: '16px' }}
+            aria-label="Visitar el blog de Pablo Iglesias Navarrete para ver tarifas y servicios"
           >
-            Empezar a Entrenar Hoy
+            Ver Tarifas y Servicios
           </a>
         </section>
 
