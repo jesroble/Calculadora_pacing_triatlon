@@ -95,7 +95,7 @@ export default function App() {
           Entrenador Nacional de Triatlón y Natación
         </p>
         <p className="hero-bizum fade-up delay-2">
-          ☕ Si esta herramienta te ayuda, puedes invitarme a un café o colaborar por Bizum· <strong>600 254 690</strong>
+          <img src="/bizum-logo.svg" alt="Logo Bizum" style={{ width: '48px', height: '48px', verticalAlign: 'middle', marginLeft: '8px', marginRight: '8px'}} /> Si esta herramienta te ayuda, puedes invitarme a un café o colaborar por Bizum · <strong>600 254 690</strong>
         </p>
       </header>
 
@@ -131,7 +131,7 @@ export default function App() {
                 <input
                   id="ftp"
                   type="number"
-                  min="100" max="500"
+                  min="50" max="500"
                   value={ftp}
                   onChange={e => setFtp(Number(e.target.value))}
                   aria-describedby="ftp-hint"
@@ -143,7 +143,7 @@ export default function App() {
                 <input
                   id="peso"
                   type="number"
-                  min="40" max="150" step="0.1"
+                  min="30" max="150" step="0.1"
                   value={peso}
                   onChange={e => setPeso(Number(e.target.value))}
                 />
