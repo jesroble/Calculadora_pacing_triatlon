@@ -230,6 +230,11 @@ body {
 }
 .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,230,118,0.4); }
 
+.results-card.nutrition { border-color: rgba(255,107,26,0.25); }
+.results-card.nutrition::before { background: linear-gradient(90deg, transparent, var(--accent2), transparent); }
+.nutrition-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 8px; }
+@media (max-width: 580px) { .nutrition-grid { grid-template-columns: 1fr; } }
+
 .faq-section { margin-bottom: 24px; }
 .faq-item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin-bottom: 10px; }
 .faq-q { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; color: var(--text); }

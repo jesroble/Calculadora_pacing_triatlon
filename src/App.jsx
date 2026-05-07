@@ -56,9 +56,16 @@ export default function App() {
   const [grasa, setGrasa] = useState(15)
   const [experiencia, setExperiencia] = useState('Media')
   const [desnivel, setDesnivel] = useState('Medio')
+  const [metodo, setMetodo] = useState('velocidad')
+  const [velocidad, setVelocidad] = useState(32)
+  const [duracionManual, setDuracionManual] = useState(3)
+  const [temp, setTemp] = useState('Moderada')
 
   const pesoMagro = tieneGrasa === 'si' ? peso * (1 - grasa / 100) : null
   const categoriaPeso = tieneGrasa !== 'si' ? 'Medio' : grasa < 10 ? 'Ligero' : grasa <= 15 ? 'Medio' : 'Pesado'
+
+  const distanciaKm = distancia === '70.3' ? 90 : 180
+  const duracion = metodo === 'velocidad' ? distanciaKm / velocidad : duracionManual
 
   const results = useMemo(() => {
     const data = distancia === '70.3' ? DATA_703 : DATA_FULL
@@ -80,6 +87,36 @@ export default function App() {
   }, [distancia, ftp, peso, experiencia, desnivel, categoriaPeso])
 
   const maxW = results ? Math.max(results.subidas, results.llano, results.bajadas) : 1
+
+  const nutrition = useMemo(() => {
+    if (!results) return null
+    const { ifRec, np } = results
+    const kj_h = np * 3.6
+    let ch_base = 0.25 + 0.75 * ifRec
+    ch_base = Math.max(0.4, Math.min(ch_base, 0.9))
+    let dur_factor = 1 - 0.05 * (duracion - 1)
+    dur_factor = Math.max(0.75, dur_factor)
+    const ch_pct = ch_base * dur_factor
+    const g_ch_h_raw = (kj_h * ch_pct) / 4
+    let limite
+    if (experiencia === 'Baja') limite = 60
+    else if (experiencia === 'Media') limite = 80
+    else limite = 100
+    const g_final = Math.min(g_ch_h_raw, limite)
+    const total_ch = g_final * duracion
+    let hydration
+    if (temp === 'Fría') hydration = { ml: 500, mg: 400 }
+    else if (temp === 'Moderada') hydration = { ml: 750, mg: 600 }
+    else hydration = { ml: 1000, mg: 900 }
+    return {
+      g_ch_h: g_final,
+      total_ch,
+      ml_h: hydration.ml,
+      mg_h: hydration.mg,
+      total_liq: hydration.ml * duracion,
+      total_sodio: hydration.mg * duracion,
+    }
+  }, [results, duracion, temp, experiencia])
 
   return (
     <>
@@ -230,6 +267,63 @@ export default function App() {
               </div>
             </div>
           </div>
+
+          {/* TIEMPO Y TEMPERATURA */}
+          <div className="form-card fade-up">
+            <div className="grid-2">
+              <div className="field">
+                <label>Estimar duración por</label>
+                <div className="tab-group" role="radiogroup" aria-label="Método de estimación de duración">
+                  {[['velocidad','Velocidad'],['manual','Manual']].map(([val, label]) => (
+                    <button
+                      key={val}
+                      className={`tab-btn${metodo === val ? ' active' : ''}`}
+                      onClick={() => setMetodo(val)}
+                      role="radio"
+                      aria-checked={metodo === val}
+                    >{label}</button>
+                  ))}
+                </div>
+                {metodo === 'velocidad' ? (
+                  <div style={{marginTop:'12px'}}>
+                    <input
+                      type="number"
+                      min="15" max="60" step="0.5"
+                      value={velocidad}
+                      onChange={e => setVelocidad(Number(e.target.value))}
+                      aria-label="Velocidad media en km/h"
+                    />
+                    <span className="hint">km/h · {distanciaKm} km → <strong style={{color:'var(--accent)'}}>{duracion.toFixed(2)} h</strong></span>
+                  </div>
+                ) : (
+                  <div style={{marginTop:'12px'}}>
+                    <input
+                      type="number"
+                      min="1" max="12" step="0.1"
+                      value={duracionManual}
+                      onChange={e => setDuracionManual(Number(e.target.value))}
+                      aria-label="Duración estimada en horas"
+                    />
+                    <span className="hint">horas</span>
+                  </div>
+                )}
+              </div>
+              <div className="field">
+                <label>Temperatura carrera</label>
+                <div className="tab-group" role="radiogroup" aria-label="Temperatura ambiental">
+                  {['Fría','Moderada','Calor'].map(t => (
+                    <button
+                      key={t}
+                      className={`tab-btn${temp === t ? ' active' : ''}`}
+                      onClick={() => setTemp(t)}
+                      role="radio"
+                      aria-checked={temp === t}
+                    >{t}</button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* RESULTADOS */}
@@ -286,6 +380,55 @@ export default function App() {
                   <span className="terrain-wkg">{(w / peso).toFixed(2)} W/kg</span>
                 </div>
               ))}
+            </div>
+          </section>
+        )}
+
+        {/* NUTRICIÓN E HIDRATACIÓN */}
+        {nutrition && (
+          <section aria-labelledby="nutrition-title" className="results-card nutrition fade-up">
+            <h2 className="results-title" id="nutrition-title" style={{color:'var(--accent2)'}}>🍌 Nutrición e Hidratación</h2>
+
+            <div className="nutrition-grid">
+              <div>
+                <p className="terrain-title" style={{marginBottom:'16px'}}>Carbohidratos</p>
+                <div className="metrics-grid" style={{gridTemplateColumns:'repeat(auto-fit, minmax(120px, 1fr))'}}>
+                  <div className="metric">
+                    <div className="metric-value" style={{color:'var(--accent2)'}}>{nutrition.g_ch_h.toFixed(0)}</div>
+                    <div className="metric-label">g CH / hora</div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric-value" style={{color:'var(--accent2)'}}>{nutrition.total_ch.toFixed(0)}</div>
+                    <div className="metric-label">g CH totales</div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric-value" style={{color:'var(--accent2)'}}>{duracion.toFixed(2)}</div>
+                    <div className="metric-label">Horas carrera</div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <p className="terrain-title" style={{marginBottom:'16px'}}>Hidratación</p>
+                <div className="metrics-grid" style={{gridTemplateColumns:'repeat(auto-fit, minmax(120px, 1fr))'}}>
+                  <div className="metric">
+                    <div className="metric-value" style={{color:'var(--green)'}}>{nutrition.ml_h}</div>
+                    <div className="metric-label">ml / hora</div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric-value" style={{color:'var(--green)'}}>{nutrition.total_liq.toFixed(0)}</div>
+                    <div className="metric-label">ml totales</div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric-value" style={{color:'var(--green)'}}>{nutrition.mg_h}</div>
+                    <div className="metric-label">mg sodio / h</div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric-value" style={{color:'var(--green)'}}>{nutrition.total_sodio.toFixed(0)}</div>
+                    <div className="metric-label">mg sodio total</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
         )}
