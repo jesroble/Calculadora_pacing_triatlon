@@ -72,7 +72,6 @@ export default function App() {
   const categoriaPeso = tieneGrasa !== 'si' ? 'Medio' : grasa < 10 ? 'Ligero' : grasa <= 15 ? 'Medio' : 'Pesado'
 
   const distanciaKm = distancia === '70.3' ? 90 : 180
-  const duracion = metodo === 'velocidad' ? distanciaKm / velocidad : duracionManual
 
   const results = useMemo(() => {
     const data = distancia === '70.3' ? DATA_703 : DATA_FULL
@@ -84,7 +83,7 @@ export default function App() {
     if (distancia === '70.3') {
       subidas = ftp * (ifRec + 0.08)
       llano   = ftp * (ifRec - 0.02)
-      bajadas = ftp * (ifRec - 0.10)
+      bajadas = ftp * (ifRec - 0.1)
     } else {
       subidas = ftp * (ifRec + 0.05)
       llano   = ftp * (ifRec - 0.01)
@@ -93,10 +92,9 @@ export default function App() {
     return { ifMin: r.ifMin, ifMax: r.ifMax, ifRec, np, subidas, llano, bajadas }
   }, [distancia, ftp, peso, experiencia, desnivel, categoriaPeso])
 
-  const maxW = results ? Math.max(results.subidas, results.llano, results.bajadas) : 1
-
   const velocidadEstimada = results ? estimarVelocidad(results.np, peso, desnivel) : null
   const velocidad = velocidadOverride ?? velocidadEstimada ?? 32
+  const duracion = metodo === 'velocidad' ? distanciaKm / velocidad : duracionManual
 
   const nutrition = useMemo(() => {
     if (!results) return null
