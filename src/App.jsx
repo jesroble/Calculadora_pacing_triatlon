@@ -463,7 +463,7 @@ export default function App() {
                 <p className="terrain-title" style={{marginBottom:'16px'}}>Carbohidratos</p>
                 <div className="metrics-grid" style={{gridTemplateColumns:'repeat(auto-fit, minmax(120px, 1fr))'}}>
                   <div className="metric">
-                    <div className="metric-value" style={{color:'var(--muted)', fontSize:'1.4rem'}}>{nutrition.g_ch_ox.toFixed(0)}</div>
+                    <div className="metric-value" style={{color:'var(--accent2)'}}>{nutrition.g_ch_ox.toFixed(0)}</div>
                     <div className="metric-label">g oxidación/h</div>
                   </div>
                   <div className="metric">
@@ -475,7 +475,7 @@ export default function App() {
                     <div className="metric-label">g CH totales</div>
                   </div>
                   <div className="metric">
-                    <div className="metric-value" style={{color:'#ffd166', fontSize:'1.4rem'}}>{nutrition.deficit_h.toFixed(0)}</div>
+                    <div className="metric-value" style={{color:'#ffd166'}}>{nutrition.deficit_h.toFixed(0)}</div>
                     <div className="metric-label">g déficit/h</div>
                   </div>
                 </div>
