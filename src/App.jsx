@@ -455,7 +455,7 @@ export default function App() {
         {/* NUTRICIÓN E HIDRATACIÓN */}
         {nutrition && (
           <section aria-labelledby="nutrition-title" className="results-card nutrition fade-up">
-            <h2 className="results-title" id="nutrition-title" style={{color:'var(--accent2)'}}>🍌 Nutrición e Hidratación</h2>
+            <h2 className="results-title" id="nutrition-title" style={{color:'var(--accent2)'}}>Nutrición e Hidratación</h2>
 
             <div className="nutrition-grid">
               {/* CARBOHIDRATOS */}
