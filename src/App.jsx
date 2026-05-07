@@ -29,6 +29,13 @@ function lookup(data, exp, peso, desnivel) {
   return row ? { ifMin: row[3], ifMax: row[4] } : null
 }
 
+function estimarVelocidad(np, peso, desnivel) {
+  let base = 29
+  if (desnivel === 'Bajo') base = 35
+  else if (desnivel === 'Medio') base = 32
+  return Math.max(20, Math.min(50, Math.round((base + 6 * (np / peso - 2.5)) * 10) / 10))
+}
+
 const FAQS = [
   {
     q: "¿Qué es el IF?",
@@ -57,7 +64,7 @@ export default function App() {
   const [experiencia, setExperiencia] = useState('Media')
   const [desnivel, setDesnivel] = useState('Medio')
   const [metodo, setMetodo] = useState('velocidad')
-  const [velocidad, setVelocidad] = useState(32)
+  const [velocidadOverride, setVelocidadOverride] = useState(null)
   const [duracionManual, setDuracionManual] = useState(3)
   const [temp, setTemp] = useState('Moderada')
 
@@ -87,6 +94,9 @@ export default function App() {
   }, [distancia, ftp, peso, experiencia, desnivel, categoriaPeso])
 
   const maxW = results ? Math.max(results.subidas, results.llano, results.bajadas) : 1
+
+  const velocidadEstimada = results ? estimarVelocidad(results.np, peso, desnivel) : null
+  const velocidad = velocidadOverride ?? velocidadEstimada ?? 32
 
   const nutrition = useMemo(() => {
     if (!results) return null
@@ -290,10 +300,22 @@ export default function App() {
                       type="number"
                       min="15" max="60" step="0.5"
                       value={velocidad}
-                      onChange={e => setVelocidad(Number(e.target.value))}
+                      onChange={e => setVelocidadOverride(Number(e.target.value))}
                       aria-label="Velocidad media en km/h"
                     />
-                    <span className="hint">km/h · {distanciaKm} km → <strong style={{color:'var(--accent)'}}>{duracion.toFixed(2)} h</strong></span>
+                    {velocidadOverride === null ? (
+                      <span className="hint">Calculado a partir de tu NP y desnivel · Ajústalo si lo conoces mejor · {distanciaKm} km → <strong style={{color:'var(--accent)'}}>{duracion.toFixed(2)} h</strong></span>
+                    ) : (
+                      <span className="hint">
+                        {distanciaKm} km → <strong style={{color:'var(--accent)'}}>{duracion.toFixed(2)} h</strong>
+                        {velocidadEstimada !== null && (
+                          <> · <button
+                            onClick={() => setVelocidadOverride(null)}
+                            style={{background:'none', border:'none', color:'var(--muted)', cursor:'pointer', padding:'0', fontSize:'inherit', textDecoration:'underline'}}
+                          >↩ Restablecer ({velocidadEstimada} km/h)</button></>
+                        )}
+                      </span>
+                    )}
                   </div>
                 ) : (
                   <div style={{marginTop:'12px'}}>
