@@ -70,6 +70,7 @@ export default function App() {
   const [tieneGrasa, setTieneGrasa] = useState('no')
   const [grasa, setGrasa] = useState(15)
   const [experiencia, setExperiencia] = useState('Media')
+  const [gut, setGut] = useState('Medio')
   const [desnivel, setDesnivel] = useState(1200)
   const [velocidadOverride, setVelocidadOverride] = useState(null)
   const [temp, setTemp] = useState('Moderada')
@@ -129,12 +130,18 @@ export default function App() {
     const kj_totales = kj_h * duracion
     const tss = Math.round(duracion * ifRec * ifRec * 100)
 
-    let ch_pct = 0.15 + ifRec
-    ch_pct = Math.min(ch_pct, 0.9)
+    let ch_pct = 0.45 + (ifRec * 0.35)
+    ch_pct = Math.min(ch_pct, 0.8)
     const g_ch_ox = (kj_h * ch_pct) / 4
 
-    const ingesta_max = experiencia === 'Baja' ? 60 : experiencia === 'Media' ? 90 : 110
-    const g_recomendados = Math.min(g_ch_ox * 0.4, ingesta_max)
+    const gutTable = {
+      Bajo:  { gut_max: 60,  factor_rep: 0.5 },
+      Medio: { gut_max: 90,  factor_rep: 0.65 },
+      Alto:  { gut_max: 110, factor_rep: 0.75 },
+      Elite: { gut_max: 130, factor_rep: 0.85 },
+    }
+    const { gut_max, factor_rep } = gutTable[gut]
+    const g_recomendados = Math.min(g_ch_ox * factor_rep, gut_max)
     const total_ch = g_recomendados * duracion
     const deficit_h = g_ch_ox - g_recomendados
 
@@ -153,7 +160,7 @@ export default function App() {
       liq_20: ml_h / 3,
       sodio_20: mg_h / 3,
     }
-  }, [results, duracion, temp, experiencia])
+  }, [results, duracion, temp, gut])
 
   // ---- Alertas ----
   const alerts = []
@@ -165,7 +172,7 @@ export default function App() {
     if (nutrition.g_ch_ox > 220)
       alerts.push("Demanda de carbohidratos extremadamente alta.")
     if (nutrition.deficit_h > 140)
-      alerts.push("Déficit energético muy elevado. Considera entrenar tolerancia intestinal (gut training).")
+      alerts.push("Déficit energético muy elevado para tu nivel de entrenamiento intestinal. Considera subir de nivel gradualmente.")
   }
 
   return (
@@ -301,6 +308,25 @@ export default function App() {
                   >{e}</button>
                 ))}
               </div>
+            </div>
+          </div>
+
+          {/* GUT TRAINING */}
+          <div className="form-card fade-up">
+            <div className="field">
+              <label>Entrenamiento intestinal (Gut Training)</label>
+              <div className="tab-group" role="radiogroup" aria-label="Nivel de entrenamiento intestinal">
+                {['Bajo','Medio','Alto','Elite'].map(g => (
+                  <button
+                    key={g}
+                    className={`tab-btn${gut === g ? ' active' : ''}`}
+                    onClick={() => setGut(g)}
+                    role="radio"
+                    aria-checked={gut === g}
+                  >{g}</button>
+                ))}
+              </div>
+              <span className="hint">Capacidad del intestino para absorber carbohidratos durante el esfuerzo</span>
             </div>
           </div>
         </section>
