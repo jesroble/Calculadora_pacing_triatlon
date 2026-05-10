@@ -311,24 +311,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* GUT TRAINING */}
-          <div className="form-card fade-up">
-            <div className="field">
-              <label>Entrenamiento intestinal (Gut Training)</label>
-              <div className="tab-group" role="radiogroup" aria-label="Nivel de entrenamiento intestinal">
-                {['Bajo','Medio','Alto','Elite'].map(g => (
-                  <button
-                    key={g}
-                    className={`tab-btn${gut === g ? ' active' : ''}`}
-                    onClick={() => setGut(g)}
-                    role="radio"
-                    aria-checked={gut === g}
-                  >{g}</button>
-                ))}
-              </div>
-              <span className="hint">Capacidad del intestino para absorber carbohidratos durante el esfuerzo</span>
-            </div>
-          </div>
         </section>
 
         {/* DATOS PRUEBA */}
@@ -412,7 +394,7 @@ export default function App() {
         </section>
 
         {/* RESULTADOS PACING */}
-        {results && nutrition && (
+        {results && nutrition && (<>
           <section aria-labelledby="results-title" className="results-card fade-up" style={{marginTop:'32px'}}>
             <h2 className="results-title" id="results-title">📊 Tu Pacing Óptimo</h2>
 
@@ -476,7 +458,25 @@ export default function App() {
               ))}
             </div>
           </section>
-        )}
+
+            <div className="form-card fade-up">
+              <div className="field">
+                <label>Entrenamiento intestinal (Gut Training)</label>
+                <div className="tab-group" role="radiogroup" aria-label="Nivel de entrenamiento intestinal">
+                  {['Bajo','Medio','Alto','Elite'].map(g => (
+                    <button
+                      key={g}
+                      className={`tab-btn${gut === g ? ' active' : ''}`}
+                      onClick={() => setGut(g)}
+                      role="radio"
+                      aria-checked={gut === g}
+                    >{g}</button>
+                  ))}
+                </div>
+                <span className="hint">Capacidad del intestino para absorber carbohidratos durante el esfuerzo</span>
+              </div>
+            </div>
+          </>)}
 
         {/* NUTRICIÓN E HIDRATACIÓN */}
         {nutrition && (
