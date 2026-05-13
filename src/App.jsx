@@ -76,23 +76,24 @@ export default function App() {
   const [temp, setTemp] = useState('Moderada')
 
   // ---- Perfil atleta ----
-  const wkg = ftp / peso
-  const pesoMagro = tieneGrasa === 'si' ? peso * (1 - grasa / 100) : null
+  const wkg = (Number(ftp) || 0) / (Number(peso) || 1)
+  const pesoMagro = tieneGrasa === 'si' ? Number(peso) * (1 - Number(grasa) / 100) : null
 
   let score = wkg >= 4.5 ? 2 : wkg >= 3.5 ? 1 : 0
   if (tieneGrasa === 'si') {
-    if (grasa < 10) score += 1
-    else if (grasa > 18) score -= 1
+    if (Number(grasa) < 10) score += 1
+    else if (Number(grasa) > 18) score -= 1
   }
   score = Math.max(0, Math.min(score, 2))
   const categoriaPeso = score === 2 ? 'Ligero' : score === 1 ? 'Medio' : 'Pesado'
 
   // ---- Desnivel metros → categoría ----
   let desnivelCat
+  const desnivelNum = Number(desnivel) || 0
   if (distancia === '70.3') {
-    desnivelCat = desnivel < 800 ? 'Bajo' : desnivel < 1500 ? 'Medio' : 'Alto'
+    desnivelCat = desnivelNum < 800 ? 'Bajo' : desnivelNum < 1500 ? 'Medio' : 'Alto'
   } else {
-    desnivelCat = desnivel < 1500 ? 'Bajo' : desnivel < 3000 ? 'Medio' : 'Alto'
+    desnivelCat = desnivelNum < 1500 ? 'Bajo' : desnivelNum < 3000 ? 'Medio' : 'Alto'
   }
 
   const distanciaKm = distancia === '70.3' ? 90 : 180
@@ -103,16 +104,17 @@ export default function App() {
     const r = lookup(data, experiencia, categoriaPeso, desnivelCat)
     if (!r) return null
     const ifRec = (r.ifMin + r.ifMax) / 2
-    const np = ftp * ifRec
+    const ftpNum = Number(ftp) || 0
+    const np = ftpNum * ifRec
     let subidas, llano, bajadas
     if (distancia === '70.3') {
-      subidas = ftp * (ifRec + 0.08)
-      llano   = ftp * (ifRec - 0.02)
-      bajadas = ftp * (ifRec - 0.1)
+      subidas = ftpNum * (ifRec + 0.08)
+      llano   = ftpNum * (ifRec - 0.02)
+      bajadas = ftpNum * (ifRec - 0.1)
     } else {
-      subidas = ftp * (ifRec + 0.05)
-      llano   = ftp * (ifRec - 0.01)
-      bajadas = ftp * (ifRec - 0.08)
+      subidas = ftpNum * (ifRec + 0.05)
+      llano   = ftpNum * (ifRec - 0.01)
+      bajadas = ftpNum * (ifRec - 0.08)
     }
     return { ifMin: r.ifMin, ifMax: r.ifMax, ifRec, np, subidas, llano, bajadas }
   }, [distancia, ftp, experiencia, categoriaPeso, desnivelCat])
@@ -227,7 +229,7 @@ export default function App() {
                   type="number"
                   min="50" max="500"
                   value={ftp}
-                  onChange={e => setFtp(Number(e.target.value))}
+                  onChange={e => setFtp(e.target.value === '' ? '' : Number(e.target.value))}
                   aria-describedby="ftp-hint"
                 />
                 <span className="hint" id="ftp-hint">
@@ -241,7 +243,7 @@ export default function App() {
                   type="number"
                   min="30" max="150" step="0.1"
                   value={peso}
-                  onChange={e => setPeso(Number(e.target.value))}
+                  onChange={e => setPeso(e.target.value === '' ? '' : Number(e.target.value))}
                 />
               </div>
             </div>
@@ -277,7 +279,7 @@ export default function App() {
                   type="number"
                   min="3" max="40" step="0.1"
                   value={grasa}
-                  onChange={e => setGrasa(Number(e.target.value))}
+                  onChange={e => setGrasa(e.target.value === '' ? '' : Number(e.target.value))}
                 />
                 <span className="hint">
                   Perfil: <strong style={{color:'var(--accent)'}}>{categoriaPeso}</strong>
@@ -327,7 +329,7 @@ export default function App() {
                   type="number"
                   min="0" max="6000" step="50"
                   value={desnivel}
-                  onChange={e => setDesnivel(Number(e.target.value))}
+                  onChange={e => setDesnivel(e.target.value === '' ? '' : Number(e.target.value))}
                 />
                 <span className="hint">
                   Categoría calculada: <strong style={{color:'var(--accent)'}}>{desnivelCat}</strong>
@@ -363,7 +365,7 @@ export default function App() {
                     type="number"
                     min="15" max="60" step="0.5"
                     value={velocidad}
-                    onChange={e => setVelocidadOverride(Number(e.target.value))}
+                    onChange={e => setVelocidadOverride(e.target.value === '' ? null : Number(e.target.value))}
                     aria-label="Velocidad media en km/h"
                   />
                   {velocidadOverride === null ? (
@@ -412,7 +414,7 @@ export default function App() {
                 <div className="metric-label">FTP W/kg</div>
               </div>
               <div className="metric">
-                <div className="metric-value">{(results.np / peso).toFixed(2)}</div>
+                <div className="metric-value">{(results.np / (Number(peso) || 1)).toFixed(2)}</div>
                 <div className="metric-label">NP W/kg</div>
               </div>
               <div className="metric">
@@ -453,7 +455,7 @@ export default function App() {
                   <span className="terrain-icon">{icon}</span>
                   <span className="terrain-name">{name}</span>
                   <span className="terrain-watts" style={{ color }}>{Math.round(w)}W</span>
-                  <span className="terrain-wkg">{(w / peso).toFixed(2)} W/kg</span>
+                  <span className="terrain-wkg">{(w / (Number(peso) || 1)).toFixed(2)} W/kg</span>
                 </div>
               ))}
             </div>
