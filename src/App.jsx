@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import InstallPWA from './InstallPWA.jsx'
+import ReloadPrompt from './ReloadPrompt.jsx'
 
 // ---- IF Tables ----
 const DATA_703 = [
@@ -621,6 +622,8 @@ export default function App() {
         <p>© {new Date().getFullYear()} Pablo Iglesias Navarrete · Entrenador Nacional de Triatlón y Natación</p>
         <p style={{marginTop:'4px'}}>📞 600 254 690 · Herramienta gratuita de pacing para triatlón</p>
       </footer>
+
+      <ReloadPrompt />
     </>
   )
 }

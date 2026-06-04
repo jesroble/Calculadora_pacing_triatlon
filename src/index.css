@@ -252,8 +252,145 @@ body {
 }
 .install-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(255,107,26,0.5); }
 .install-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 3px; }
-.install-hint { max-width: 360px; color: var(--muted); font-size: 0.85rem; line-height: 1.5; }
-.install-hint strong { color: var(--text); }
+.install-btn--outline {
+  background: transparent;
+  color: var(--accent2);
+  border: 2px solid var(--accent2);
+  box-shadow: none;
+}
+.install-btn--outline:hover { background: rgba(255,107,26,0.08); box-shadow: none; transform: translateY(-2px); }
+
+/* Guía de instalación (Safari iOS / macOS) */
+.install-guide {
+  margin-top: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  max-width: 340px;
+  text-align: left;
+  animation: fadeIn 0.2s ease;
+}
+.install-guide__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  color: var(--accent2);
+  text-transform: uppercase;
+  margin: 0 0 14px;
+}
+.install-guide__steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.install-guide__steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.install-guide__steps li strong { color: var(--text); }
+.install-guide__step-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  background: var(--accent2);
+  color: #0a0a0a;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 900;
+  margin-top: 1px;
+}
+.install-guide__symbol {
+  display: inline-block;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1px 6px;
+  font-size: 0.8rem;
+  margin: 0 2px;
+  vertical-align: middle;
+}
+.install-guide__note {
+  margin: 12px 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+/* Banner de actualización */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateX(-50%) translateY(16px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.reload-prompt {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--card);
+  border: 1px solid rgba(255,107,26,0.5);
+  border-radius: 16px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,107,26,0.15);
+  z-index: 9999;
+  max-width: calc(100vw - 32px);
+  width: max-content;
+  animation: slide-up 0.3s ease;
+}
+.reload-prompt__text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+.reload-prompt__icon { font-size: 1.2rem; flex-shrink: 0; }
+.reload-prompt__sub { color: var(--muted); }
+.reload-prompt__actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.reload-prompt__btn {
+  cursor: pointer;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.reload-prompt__btn--update {
+  background: var(--accent2);
+  color: #0a0a0a;
+  box-shadow: 0 2px 12px rgba(255,107,26,0.35);
+}
+.reload-prompt__btn--update:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(255,107,26,0.5); }
+.reload-prompt__btn--dismiss {
+  background: var(--card2);
+  color: var(--muted);
+  padding: 8px 12px;
+}
+.reload-prompt__btn--dismiss:hover { color: var(--text); }
+@media (max-width: 540px) {
+  .reload-prompt { flex-direction: column; align-items: flex-start; gap: 12px; bottom: 16px; }
+  .reload-prompt__sub { display: none; }
+}
 
 .results-card.nutrition { border-color: rgba(255,107,26,0.25); }
 .results-card.nutrition::before { background: linear-gradient(90deg, transparent, var(--accent2), transparent); }
