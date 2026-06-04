@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import InstallPWA from './InstallPWA.jsx'
 
 // ---- IF Tables ----
 const DATA_703 = [
@@ -193,6 +194,7 @@ export default function App() {
         <p className="hero-bizum fade-up delay-2">
           <img src="/bizum-logo.svg" alt="Logo Bizum" style={{ width: '48px', height: '48px', verticalAlign: 'middle', marginLeft: '8px', marginRight: '8px'}} /> Si esta herramienta te ayuda, puedes invitarme a un café o colaborar por Bizum · <strong>600 254 690</strong>
         </p>
+        <InstallPWA />
       </header>
 
       <main className="app-container" role="main">
