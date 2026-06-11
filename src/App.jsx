@@ -31,13 +31,11 @@ function lookup(data, exp, perfil, desnivelCat) {
   return row ? { ifMin: row[3], ifMax: row[4] } : null
 }
 
-function estimarVelocidad(wkg, experiencia, desnivelCat, distancia) {
-  const base = 12 + (wkg * 7)
+function estimarVelocidad(npWkg, experiencia, desnivelCat) {
+  const base = 15.8 + (npWkg * 8)
   const expFactor = experiencia === 'Baja' ? 0.94 : experiencia === 'Media' ? 0.97 : 1.0
   const desnFactor = desnivelCat === 'Bajo' ? 1.0 : desnivelCat === 'Medio' ? 0.95 : 0.90
-  let v = base * expFactor * desnFactor
-  if (distancia !== '70.3') v = Math.min(v, 42)
-  return Math.round(v * 10) / 10
+  return Math.round(base * expFactor * desnFactor * 10) / 10
 }
 
 function fmtDuracion(h) {
@@ -122,7 +120,7 @@ export default function App() {
   }, [distancia, ftp, experiencia, categoriaPeso, desnivelCat])
 
   // ---- Velocidad y duración ----
-  const velocidadEstimada = results ? estimarVelocidad(wkg, experiencia, desnivelCat, distancia) : null
+  const velocidadEstimada = results ? estimarVelocidad(results.np / (Number(peso) || 1), experiencia, desnivelCat) : null
   const velocidad = velocidadOverride ?? velocidadEstimada ?? 32
   const duracion = distanciaKm / velocidad
 
