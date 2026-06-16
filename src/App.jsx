@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import InstallPWA from './InstallPWA.jsx'
 import ReloadPrompt from './ReloadPrompt.jsx'
+import { Analytics } from '@vercel/analytics/react'
 
 // ---- IF Tables ----
 const DATA_703 = [
@@ -622,6 +623,7 @@ export default function App() {
       </footer>
 
       <ReloadPrompt />
+      <Analytics />
     </>
   )
 }
