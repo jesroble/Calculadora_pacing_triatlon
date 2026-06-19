@@ -230,6 +230,39 @@ body {
 }
 .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,230,118,0.4); }
 
+.share-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  background: var(--accent2);
+  color: #0a0a0a;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 12px;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 24px rgba(255,107,26,0.3);
+}
+.share-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(255,107,26,0.45); }
+.share-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 3px; }
+.share-btn:disabled { opacity: 0.6; cursor: wait; transform: none; box-shadow: none; }
+
+.progress-card { background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.25); border-radius: 14px; padding: 18px 22px; }
+.progress-card__title { font-family: var(--font-display); font-weight: 700; font-size: 1rem; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+.progress-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; font-size: 0.95rem; padding: 8px 0; border-top: 1px solid var(--border); color: var(--text); }
+.progress-row:first-of-type { border-top: none; }
+.progress-delta--up { color: var(--green); font-weight: 700; }
+.progress-delta--down { color: #ff6b6b; font-weight: 700; }
+.progress-delta--flat { color: var(--muted); font-weight: 700; }
+.progress-note { font-size: 0.8rem; color: var(--muted); margin-top: 10px; }
+
 /* ===== Botón Instalar app (PWA) ===== */
 .install-pwa { margin-top: 22px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .install-btn {
@@ -401,7 +434,23 @@ body {
 
 .faq-section { margin-bottom: 24px; }
 .faq-item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin-bottom: 10px; }
-.faq-q { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+.faq-q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+.faq-chevron { flex-shrink: 0; font-size: 1.4rem; font-weight: 900; color: var(--accent); line-height: 1; }
 .faq-a { font-size: 1rem; color: var(--muted); line-height: 1.6; }
 
 footer { text-align: center; padding: 24px 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 1rem; }

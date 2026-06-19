@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import InstallPWA from './InstallPWA.jsx'
 import ReloadPrompt from './ReloadPrompt.jsx'
+import { generateShareImageBlob } from './shareImage.js'
 import { Analytics } from '@vercel/analytics/react'
 
 // ---- IF Tables ----
@@ -26,6 +27,22 @@ const DATA_FULL = [
   ["Alta","Medio","Bajo",0.68,0.71],["Alta","Medio","Medio",0.67,0.70],["Alta","Medio","Alto",0.66,0.69],
   ["Alta","Pesado","Bajo",0.67,0.70],["Alta","Pesado","Medio",0.66,0.69],["Alta","Pesado","Alto",0.65,0.68],
 ]
+
+const CARRERAS_703 = [
+  { value: '70.3-vitoria',  label: '70.3 Vitoria-Gasteiz',  desnivel: 950 },
+  { value: '70.3-mallorca', label: '70.3 Mallorca (Alcúdia)', desnivel: 700 },
+  { value: '70.3-marbella', label: '70.3 Marbella',          desnivel: 850 },
+  { value: '70.3-calella',  label: '70.3 Calella',           desnivel: 750 },
+  { value: '70.3-cascais',  label: '70.3 Cascais',           desnivel: 600 },
+]
+const CARRERAS_FULL = [
+  { value: 'full-lanzarote', label: 'Ironman Lanzarote',  desnivel: 2600 },
+  { value: 'full-vitoria',   label: 'Ironman Vitoria',    desnivel: 1800 },
+  { value: 'full-barcelona', label: 'Ironman Barcelona',  desnivel: 1200 },
+  { value: 'full-frankfurt', label: 'Ironman Frankfurt',  desnivel: 1700 },
+  { value: 'full-zurich',    label: 'Ironman Zurich',     desnivel: 1800 },
+]
+const TODAS_CARRERAS = [...CARRERAS_703, ...CARRERAS_FULL]
 
 function lookup(data, exp, perfil, desnivelCat) {
   const row = data.find(r => r[0] === exp && r[1] === perfil && r[2] === desnivelCat)
@@ -64,6 +81,29 @@ const FAQS = [
   }
 ]
 
+const STORAGE_KEY = 'pablotriatlon:lastPlan'
+
+function loadLastPlan() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return null
+    const plan = JSON.parse(raw)
+    const valid = plan && typeof plan.savedAt === 'number' && typeof plan.ftp === 'number' &&
+      typeof plan.wkg === 'number' && typeof plan.np === 'number' && typeof plan.ifRec === 'number'
+    return valid ? plan : null
+  } catch {
+    return null
+  }
+}
+
+function saveLastPlan(plan) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(plan))
+  } catch {
+    // localStorage no disponible (modo privado, cuota llena...) — no es crítico
+  }
+}
+
 export default function App() {
   const [distancia, setDistancia] = useState('70.3')
   const [ftp, setFtp] = useState(250)
@@ -75,6 +115,11 @@ export default function App() {
   const [desnivel, setDesnivel] = useState(1200)
   const [velocidadOverride, setVelocidadOverride] = useState(null)
   const [temp, setTemp] = useState('Moderada')
+  const [carreraSeleccionada, setCarreraSeleccionada] = useState('')
+  const [openFaq, setOpenFaq] = useState(null)
+  const [shareMsg, setShareMsg] = useState('')
+  const [sharing, setSharing] = useState(false)
+  const [previousPlan] = useState(loadLastPlan)
 
   // ---- Perfil atleta ----
   const wkg = (Number(ftp) || 0) / (Number(peso) || 1)
@@ -165,6 +210,25 @@ export default function App() {
     }
   }, [results, duracion, temp, gut])
 
+  // ---- Progreso (localStorage) ----
+  const isDefaultState = distancia === '70.3' && Number(ftp) === 250 && Number(peso) === 70 &&
+    tieneGrasa === 'no' && experiencia === 'Media' && gut === 'Medio' && Number(desnivel) === 1200 && temp === 'Moderada'
+  const sameDistanciaQuePrevio = previousPlan?.distancia === distancia
+
+  useEffect(() => {
+    if (isDefaultState || !results || !nutrition) return
+    saveLastPlan({
+      savedAt: Date.now(),
+      distancia,
+      ftp: Number(ftp) || 0,
+      peso: Number(peso) || 0,
+      wkg,
+      ifRec: results.ifRec,
+      np: results.np,
+      tss: nutrition.tss,
+    })
+  }, [isDefaultState, results, nutrition, distancia, ftp, peso, wkg])
+
   // ---- Alertas ----
   const alerts = []
   if (results && nutrition) {
@@ -176,6 +240,82 @@ export default function App() {
       alerts.push("Demanda de carbohidratos extremadamente alta.")
     if (nutrition.deficit_h > 140)
       alerts.push("Déficit energético muy elevado para tu nivel de entrenamiento intestinal. Considera subir de nivel gradualmente.")
+  }
+
+  // ---- Handlers ----
+  function handleDistanciaChange(d) {
+    setDistancia(d)
+    setVelocidadOverride(null)
+    setCarreraSeleccionada('')
+  }
+
+  function handleCarreraChange(e) {
+    const val = e.target.value
+    setCarreraSeleccionada(val)
+    if (!val) return
+    const carrera = TODAS_CARRERAS.find(c => c.value === val)
+    if (!carrera) return
+    setDesnivel(carrera.desnivel)
+    setVelocidadOverride(null)
+    if (val.startsWith('70.3') && distancia !== '70.3') setDistancia('70.3')
+    if (val.startsWith('full') && distancia !== 'Ironman Full') setDistancia('Ironman Full')
+  }
+
+  async function handleShare() {
+    if (!results || !nutrition) return
+    const texto = [
+      `📊 Pacing ${distancia === '70.3' ? 'Ironman 70.3' : 'Ironman Full'} — pablotriatlon.com`,
+      `━━━━━━━━━━━━━━━━━━━━━`,
+      `IF: ${results.ifRec.toFixed(2)} | NP: ${results.np.toFixed(0)}W | ${(results.np / (Number(peso) || 1)).toFixed(2)} W/kg`,
+      `TSS: ${nutrition.tss} | ${nutrition.kj_totales.toFixed(0)} kJ`,
+      ``,
+      `⛰️ Subidas: ${Math.round(results.subidas)}W`,
+      `➡️ Llano: ${Math.round(results.llano)}W`,
+      `⬇️ Bajadas: ${Math.round(results.bajadas)}W`,
+      ``,
+      `🍌 CH: ${nutrition.g_recomendados.toFixed(0)}g/h | 💧 ${nutrition.ml_h}ml/h | 🧂 ${nutrition.mg_h}mg sodio/h`,
+      `⏱️ Tiempo estimado: ${fmtDuracion(duracion)} a ${velocidad} km/h`,
+      ``,
+      `Calcula el tuyo en pablotriatlon.com`,
+    ].join('\n')
+
+    function fallbackTextShare() {
+      if (navigator.share) {
+        navigator.share({ title: `Mi pacing ${distancia}`, text: texto, url: 'https://pablotriatlon.com' }).catch(() => {})
+      } else {
+        navigator.clipboard.writeText(texto).then(() => {
+          setShareMsg('¡Copiado al portapapeles!')
+          setTimeout(() => setShareMsg(''), 3000)
+        })
+      }
+    }
+
+    setSharing(true)
+    try {
+      const blob = await generateShareImageBlob({ distancia, results, nutrition, peso, velocidad, duracion, distanciaKm, fmtDuracion })
+      const file = new File([blob], 'mi-pacing-pablotriatlon.png', { type: 'image/png' })
+
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: `Mi pacing ${distancia}`, text: texto })
+        return
+      }
+
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'mi-pacing-pablotriatlon.png'
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+      await navigator.clipboard?.writeText(texto)
+      setShareMsg('¡Imagen descargada y texto copiado!')
+      setTimeout(() => setShareMsg(''), 3500)
+    } catch (err) {
+      if (err?.name !== 'AbortError') fallbackTextShare()
+    } finally {
+      setSharing(false)
+    }
   }
 
   return (
@@ -192,7 +332,7 @@ export default function App() {
           Entrenador Nacional de Triatlón y Natación
         </p>
         <p className="hero-bizum fade-up delay-2">
-          <img src="/bizum-logo.svg" alt="Logo Bizum" style={{ width: '48px', height: '48px', verticalAlign: 'middle', marginLeft: '8px', marginRight: '8px'}} /> Si esta herramienta te ayuda, puedes invitarme a un café o colaborar por Bizum · <strong>600 254 690</strong>
+          <img src="/bizum-logo.svg" alt="Logo Bizum" style={{ width: '48px', height: '48px', verticalAlign: 'middle', marginLeft: '8px', marginRight: '8px'}} /> Si esta herramienta te ayuda, puedes invitarme a un café o colaborar por Bizum · <strong><a href="tel:+34600254690" style={{ color: 'inherit', textDecoration: 'underline' }}>600 254 690</a></strong>
         </p>
         <InstallPWA />
       </header>
@@ -212,7 +352,7 @@ export default function App() {
                   <button
                     key={d}
                     className={`tab-btn${distancia === d ? ' active' : ''}`}
-                    onClick={() => setDistancia(d)}
+                    onClick={() => handleDistanciaChange(d)}
                     role="radio"
                     aria-checked={distancia === d}
                   >{d}</button>
@@ -321,6 +461,31 @@ export default function App() {
         <section aria-labelledby="prueba-title" style={{marginTop:'32px'}}>
           <p className="section-label" id="prueba-title">Datos de la prueba</p>
 
+          {/* SELECTOR DE CARRERA */}
+          <div className="form-card fade-up">
+            <div className="field">
+              <label htmlFor="carrera">Selecciona tu carrera (opcional)</label>
+              <select
+                id="carrera"
+                value={carreraSeleccionada}
+                onChange={handleCarreraChange}
+              >
+                <option value="">Personalizado — introduce el desnivel manualmente</option>
+                <optgroup label="Ironman 70.3">
+                  {CARRERAS_703.map(c => (
+                    <option key={c.value} value={c.value}>{c.label} · {c.desnivel}m desnivel</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Ironman Full">
+                  {CARRERAS_FULL.map(c => (
+                    <option key={c.value} value={c.value}>{c.label} · {c.desnivel}m desnivel</option>
+                  ))}
+                </optgroup>
+              </select>
+              <span className="hint">Rellena automáticamente la distancia y el desnivel de la carrera</span>
+            </div>
+          </div>
+
           {/* DESNIVEL Y TEMPERATURA */}
           <div className="form-card fade-up">
             <div className="grid-2">
@@ -331,7 +496,10 @@ export default function App() {
                   type="number"
                   min="0" max="6000" step="50"
                   value={desnivel}
-                  onChange={e => setDesnivel(e.target.value === '' ? '' : Number(e.target.value))}
+                  onChange={e => {
+                    setDesnivel(e.target.value === '' ? '' : Number(e.target.value))
+                    setCarreraSeleccionada('')
+                  }}
                 />
                 <span className="hint">
                   Categoría calculada: <strong style={{color:'var(--accent)'}}>{desnivelCat}</strong>
@@ -399,7 +567,42 @@ export default function App() {
 
         {/* RESULTADOS PACING */}
         {results && nutrition && (<>
-          <section aria-labelledby="results-title" className="results-card fade-up" style={{marginTop:'32px'}}>
+          {previousPlan && (
+            <section aria-labelledby="progress-title" className="progress-card fade-up" style={{marginTop:'32px'}}>
+              <p className="progress-card__title" id="progress-title">
+                📈 Tu progreso desde el {new Date(previousPlan.savedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </p>
+              {[
+                { label: 'FTP', prev: previousPlan.ftp, now: Number(ftp) || 0, unit: 'W' },
+                { label: 'W/kg FTP', prev: previousPlan.wkg, now: wkg, unit: '', digits: 2 },
+                ...(sameDistanciaQuePrevio ? [
+                  { label: 'NP objetivo', prev: previousPlan.np, now: results.np, unit: 'W' },
+                  { label: 'IF recomendado', prev: previousPlan.ifRec, now: results.ifRec, unit: '', digits: 2 },
+                ] : []),
+              ].map(({ label, prev, now, unit, digits = 0 }) => {
+                const delta = now - prev
+                const dir = delta > 0.005 ? 'up' : delta < -0.005 ? 'down' : 'flat'
+                return (
+                  <div className="progress-row" key={label}>
+                    <span>{label}</span>
+                    <span>
+                      {prev.toFixed(digits)}{unit} → <strong>{now.toFixed(digits)}{unit}</strong>{' '}
+                      <span className={`progress-delta progress-delta--${dir}`}>
+                        {dir === 'up' ? '▲' : dir === 'down' ? '▼' : '–'} {Math.abs(delta).toFixed(digits)}{unit}
+                      </span>
+                    </span>
+                  </div>
+                )
+              })}
+              {!sameDistanciaQuePrevio && (
+                <p className="progress-note">
+                  Tu plan anterior era para {previousPlan.distancia === '70.3' ? 'Ironman 70.3' : 'Ironman Full'} — por eso solo comparamos FTP y W/kg.
+                </p>
+              )}
+            </section>
+          )}
+
+          <section aria-labelledby="results-title" className="results-card fade-up" style={{marginTop: previousPlan ? '20px' : '32px'}}>
             <h2 className="results-title" id="results-title">📊 Tu Pacing Óptimo</h2>
 
             <div className="metrics-grid">
@@ -463,24 +666,24 @@ export default function App() {
             </div>
           </section>
 
-            <div className="form-card fade-up">
-              <div className="field">
-                <label>Entrenamiento intestinal (Gut Training)</label>
-                <div className="tab-group" role="radiogroup" aria-label="Nivel de entrenamiento intestinal">
-                  {['Bajo','Medio','Alto','Elite'].map(g => (
-                    <button
-                      key={g}
-                      className={`tab-btn${gut === g ? ' active' : ''}`}
-                      onClick={() => setGut(g)}
-                      role="radio"
-                      aria-checked={gut === g}
-                    >{g}</button>
-                  ))}
-                </div>
-                <span className="hint">Capacidad del intestino para absorber carbohidratos durante el esfuerzo</span>
+          <div className="form-card fade-up">
+            <div className="field">
+              <label>Entrenamiento intestinal (Gut Training)</label>
+              <div className="tab-group" role="radiogroup" aria-label="Nivel de entrenamiento intestinal">
+                {['Bajo','Medio','Alto','Elite'].map(g => (
+                  <button
+                    key={g}
+                    className={`tab-btn${gut === g ? ' active' : ''}`}
+                    onClick={() => setGut(g)}
+                    role="radio"
+                    aria-checked={gut === g}
+                  >{g}</button>
+                ))}
               </div>
+              <span className="hint">Capacidad del intestino para absorber carbohidratos durante el esfuerzo</span>
             </div>
-          </>)}
+          </div>
+        </>)}
 
         {/* NUTRICIÓN E HIDRATACIÓN */}
         {nutrition && (
@@ -556,6 +759,15 @@ export default function App() {
                 </div>
               </div>
             </div>
+
+            {/* COMPARTIR */}
+            <div style={{borderTop:'1px solid var(--border)', marginTop:'24px', paddingTop:'20px'}}>
+              <button className="share-btn" onClick={handleShare} disabled={sharing} aria-label="Compartir o descargar mi plan de carrera como imagen">
+                <span aria-hidden="true">📸</span>
+                {sharing ? 'Generando imagen…' : (shareMsg || 'Compartir mi plan como imagen')}
+              </button>
+              <p className="hint" style={{textAlign:'center', marginTop:'10px'}}>Ideal para compartir en tus stories</p>
+            </div>
           </section>
         )}
 
@@ -607,9 +819,16 @@ export default function App() {
         <section aria-labelledby="faq-title" className="faq-section">
           <p className="section-label" id="faq-title">Preguntas Frecuentes</p>
           {FAQS.map((f, i) => (
-            <article key={i} className="faq-item">
-              <h3 className="faq-q">{f.q}</h3>
-              <p className="faq-a">{f.a}</p>
+            <article key={i} className={`faq-item${openFaq === i ? ' open' : ''}`}>
+              <button
+                className="faq-q"
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                aria-expanded={openFaq === i}
+              >
+                {f.q}
+                <span className="faq-chevron" aria-hidden="true">{openFaq === i ? '−' : '+'}</span>
+              </button>
+              {openFaq === i && <p className="faq-a">{f.a}</p>}
             </article>
           ))}
         </section>
@@ -619,7 +838,7 @@ export default function App() {
       <footer role="contentinfo">
         <img src="/logo.png" alt="Logo Pablo Iglesias Navarrete — Entrenador Triatlón" className="hero-logo fade-up" />
         <p>© {new Date().getFullYear()} Pablo Iglesias Navarrete · Entrenador Nacional de Triatlón y Natación</p>
-        <p style={{marginTop:'4px'}}>📞 600 254 690 · Herramienta gratuita de pacing para triatlón</p>
+        <p style={{marginTop:'4px'}}>📞 <a href="tel:+34600254690" style={{ color: 'inherit', textDecoration: 'underline' }}>600 254 690</a> · Herramienta gratuita de pacing para triatlón</p>
       </footer>
 
       <ReloadPrompt />
