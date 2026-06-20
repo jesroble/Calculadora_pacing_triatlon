@@ -183,7 +183,7 @@ export async function generateShareImageBlob({ distancia, results, nutrition, pe
   y += 66
   ctx.fillStyle = COLORS.accent
   ctx.font = '900 42px "Barlow Condensed", sans-serif'
-  ctx.fillText('pablotriatlon.com', pad, y)
+  ctx.fillText('triatlonpacing.com', pad, y)
   ctx.fillStyle = COLORS.muted
   ctx.font = '600 24px Barlow, sans-serif'
   ctx.textAlign = 'right'

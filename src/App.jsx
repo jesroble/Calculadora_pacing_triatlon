@@ -81,7 +81,7 @@ const FAQS = [
   }
 ]
 
-const STORAGE_KEY = 'pablotriatlon:lastPlan'
+const STORAGE_KEY = 'triatlonpacing:lastPlan'
 
 function loadLastPlan() {
   try {
@@ -264,7 +264,7 @@ export default function App() {
   async function handleShare() {
     if (!results || !nutrition) return
     const texto = [
-      `📊 Pacing ${distancia === '70.3' ? 'Ironman 70.3' : 'Ironman Full'} — pablotriatlon.com`,
+      `📊 Pacing ${distancia === '70.3' ? 'Ironman 70.3' : 'Ironman Full'} — triatlonpacing.com`,
       `━━━━━━━━━━━━━━━━━━━━━`,
       `IF: ${results.ifRec.toFixed(2)} | NP: ${results.np.toFixed(0)}W | ${(results.np / (Number(peso) || 1)).toFixed(2)} W/kg`,
       `TSS: ${nutrition.tss} | ${nutrition.kj_totales.toFixed(0)} kJ`,
@@ -276,12 +276,12 @@ export default function App() {
       `🍌 CH: ${nutrition.g_recomendados.toFixed(0)}g/h | 💧 ${nutrition.ml_h}ml/h | 🧂 ${nutrition.mg_h}mg sodio/h`,
       `⏱️ Tiempo estimado: ${fmtDuracion(duracion)} a ${velocidad} km/h`,
       ``,
-      `Calcula el tuyo en pablotriatlon.com`,
+      `Calcula el tuyo en triatlonpacing.com`,
     ].join('\n')
 
     function fallbackTextShare() {
       if (navigator.share) {
-        navigator.share({ title: `Mi pacing ${distancia}`, text: texto, url: 'https://pablotriatlon.com' }).catch(() => {})
+        navigator.share({ title: `Mi pacing ${distancia}`, text: texto, url: 'https://triatlonpacing.com' }).catch(() => {})
       } else {
         navigator.clipboard.writeText(texto).then(() => {
           setShareMsg('¡Copiado al portapapeles!')
@@ -293,7 +293,7 @@ export default function App() {
     setSharing(true)
     try {
       const blob = await generateShareImageBlob({ distancia, results, nutrition, peso, velocidad, duracion, distanciaKm, fmtDuracion })
-      const file = new File([blob], 'mi-pacing-pablotriatlon.png', { type: 'image/png' })
+      const file = new File([blob], 'mi-pacing-triatlonpacing.png', { type: 'image/png' })
 
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: `Mi pacing ${distancia}`, text: texto })
@@ -303,7 +303,7 @@ export default function App() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = 'mi-pacing-pablotriatlon.png'
+      a.download = 'mi-pacing-triatlonpacing.png'
       document.body.appendChild(a)
       a.click()
       a.remove()
