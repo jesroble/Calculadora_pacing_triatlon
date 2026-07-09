@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import InstallPWA from './InstallPWA.jsx'
 import ReloadPrompt from './ReloadPrompt.jsx'
+import Icon from './Icons.jsx'
 import { generateShareImageBlob } from './shareImage.js'
 import { Analytics } from '@vercel/analytics/react'
 
@@ -570,7 +571,8 @@ export default function App() {
           {previousPlan && (
             <section aria-labelledby="progress-title" className="progress-card fade-up" style={{marginTop:'32px'}}>
               <p className="progress-card__title" id="progress-title">
-                📈 Tu progreso desde el {new Date(previousPlan.savedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+                <Icon name="trendingUp" size={18} className="title-icon" />
+                Tu progreso desde el {new Date(previousPlan.savedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
               </p>
               {[
                 { label: 'FTP', prev: previousPlan.ftp, now: Number(ftp) || 0, unit: 'W' },
@@ -588,7 +590,9 @@ export default function App() {
                     <span>
                       {prev.toFixed(digits)}{unit} → <strong>{now.toFixed(digits)}{unit}</strong>{' '}
                       <span className={`progress-delta progress-delta--${dir}`}>
-                        {dir === 'up' ? '▲' : dir === 'down' ? '▼' : '–'} {Math.abs(delta).toFixed(digits)}{unit}
+                        {dir === 'up' && <Icon name="trendingUp" size={14} />}
+                        {dir === 'down' && <Icon name="trendingDown" size={14} />}
+                        {dir === 'flat' ? '±' : ''} {Math.abs(delta).toFixed(digits)}{unit}
                       </span>
                     </span>
                   </div>
@@ -603,7 +607,7 @@ export default function App() {
           )}
 
           <section aria-labelledby="results-title" className="results-card fade-up" style={{marginTop: previousPlan ? '20px' : '32px'}}>
-            <h2 className="results-title" id="results-title">📊 Tu Pacing Óptimo</h2>
+            <h2 className="results-title" id="results-title"><Icon name="gauge" size={22} className="title-icon" />Tu Pacing Óptimo</h2>
 
             <div className="metrics-grid">
               <div className="metric">
@@ -652,12 +656,12 @@ export default function App() {
             <div className="terrain-section">
               <p className="terrain-title">Pacing por tipo de terreno</p>
               {[
-                { icon: '⛰️', name: 'Subidas', w: results.subidas, color: '#ff6b6b' },
-                { icon: '➡️', name: 'Llano',   w: results.llano,   color: '#00d4ff' },
-                { icon: '⬇️', name: 'Bajadas', w: results.bajadas, color: '#00e676' },
+                { icon: 'mountain',       name: 'Subidas', w: results.subidas, color: '#ff7a6b' },
+                { icon: 'arrowRight',     name: 'Llano',   w: results.llano,   color: '#00d4ff' },
+                { icon: 'arrowDownRight', name: 'Bajadas', w: results.bajadas, color: '#00e676' },
               ].map(({ icon, name, w, color }) => (
                 <div className="terrain-row" key={name}>
-                  <span className="terrain-icon">{icon}</span>
+                  <span className="terrain-icon" style={{ color }}><Icon name={icon} size={20} /></span>
                   <span className="terrain-name">{name}</span>
                   <span className="terrain-watts" style={{ color }}>{Math.round(w)}W</span>
                   <span className="terrain-wkg">{(w / (Number(peso) || 1)).toFixed(2)} W/kg</span>
@@ -688,7 +692,7 @@ export default function App() {
         {/* NUTRICIÓN E HIDRATACIÓN */}
         {nutrition && (
           <section aria-labelledby="nutrition-title" className="results-card nutrition fade-up">
-            <h2 className="results-title" id="nutrition-title" style={{color:'var(--accent2)'}}>Nutrición e Hidratación</h2>
+            <h2 className="results-title" id="nutrition-title" style={{color:'var(--accent2)'}}><Icon name="droplet" size={22} className="title-icon" />Nutrición e Hidratación</h2>
 
             <div className="nutrition-grid">
               {/* CARBOHIDRATOS */}
@@ -763,7 +767,7 @@ export default function App() {
             {/* COMPARTIR */}
             <div style={{borderTop:'1px solid var(--border)', marginTop:'24px', paddingTop:'20px'}}>
               <button className="share-btn" onClick={handleShare} disabled={sharing} aria-label="Compartir o descargar mi plan de carrera como imagen">
-                <span aria-hidden="true">📸</span>
+                <Icon name="camera" size={20} />
                 {sharing ? 'Generando imagen…' : (shareMsg || 'Compartir mi plan como imagen')}
               </button>
               <p className="hint" style={{textAlign:'center', marginTop:'10px'}}>Ideal para compartir en tus stories</p>
@@ -776,7 +780,7 @@ export default function App() {
           <section aria-labelledby="alerts-title" style={{marginBottom:'24px'}}>
             <p className="section-label" id="alerts-title">Análisis fisiológico</p>
             {alerts.map((msg, i) => (
-              <div key={i} className="alert-card">⚠️ {msg}</div>
+              <div key={i} className="alert-card"><Icon name="alert" size={20} /><span>{msg}</span></div>
             ))}
           </section>
         )}
@@ -787,15 +791,15 @@ export default function App() {
           <p>Planificación científica personalizada para triatletas de todos los niveles</p>
           <div className="services-grid">
             {[
-              { icon: '🏊', title: 'Natación técnica', desc: 'Eficiencia y técnica para el segmento más temido' },
-              { icon: '🚴', title: 'Ciclismo y pacing', desc: 'Control del esfuerzo y potencia en carretera' },
-              { icon: '🏃', title: 'Carrera a pie', desc: 'Gestión de carga y ritmo en la maratón' },
-              { icon: '🧠', title: 'Planificación científica', desc: 'Seguimiento semanal con datos reales' },
-              { icon: '📊', title: 'Análisis de datos', desc: 'W/kg, NP, TSS, IF, HRV y más métricas' },
-              { icon: '🌿', title: 'Adaptación total', desc: 'Compatible con tu vida, trabajo y familia' },
+              { icon: 'swim',      title: 'Natación técnica', desc: 'Eficiencia y técnica para el segmento más temido' },
+              { icon: 'bike',      title: 'Ciclismo y pacing', desc: 'Control del esfuerzo y potencia en carretera' },
+              { icon: 'run',       title: 'Carrera a pie', desc: 'Gestión de carga y ritmo en la maratón' },
+              { icon: 'clipboard', title: 'Planificación científica', desc: 'Seguimiento semanal con datos reales' },
+              { icon: 'activity',  title: 'Análisis de datos', desc: 'W/kg, NP, TSS, IF, HRV y más métricas' },
+              { icon: 'leaf',      title: 'Adaptación total', desc: 'Compatible con tu vida, trabajo y familia' },
             ].map(s => (
               <div className="service-item" key={s.title}>
-                <span className="service-icon">{s.icon}</span>
+                <span className="service-icon"><Icon name={s.icon} size={22} /></span>
                 <div className="service-text">
                   <strong>{s.title}</strong>
                   {s.desc}
@@ -838,7 +842,10 @@ export default function App() {
       <footer role="contentinfo">
         <img src="/logo.png" alt="Logo Pablo Iglesias Navarrete — Entrenador Triatlón" className="hero-logo fade-up" />
         <p>© {new Date().getFullYear()} Pablo Iglesias Navarrete · Entrenador Nacional de Triatlón y Natación</p>
-        <p style={{marginTop:'4px'}}>📞 <a href="tel:+34600254690" style={{ color: 'inherit', textDecoration: 'underline' }}>600 254 690</a> · Herramienta gratuita de pacing para triatlón</p>
+        <p style={{marginTop:'4px', display:'inline-flex', alignItems:'center', gap:'6px', flexWrap:'wrap', justifyContent:'center'}}>
+          <Icon name="phone" size={15} style={{ verticalAlign: 'middle' }} />
+          <a href="tel:+34600254690" style={{ color: 'inherit', textDecoration: 'underline' }}>600 254 690</a> · Herramienta gratuita de pacing para triatlón
+        </p>
       </footer>
 
       <ReloadPrompt />

@@ -168,9 +168,23 @@ export async function generateShareImageBlob({ distancia, results, nutrition, pe
   })
   y += 124 + 64
 
+  // Reloj de línea dibujado a mano (evita el emoji ⏱, que se renderiza distinto en cada SO)
+  const clockR = 13
+  const clockCx = pad + clockR
+  const clockCy = y - 10
+  ctx.strokeStyle = COLORS.accent
+  ctx.lineWidth = 2.5
+  ctx.lineCap = 'round'
+  ctx.beginPath()
+  ctx.arc(clockCx, clockCy, clockR, 0, Math.PI * 2)
+  ctx.moveTo(clockCx, clockCy - 6)
+  ctx.lineTo(clockCx, clockCy)
+  ctx.lineTo(clockCx + 5, clockCy + 3)
+  ctx.stroke()
+
   ctx.fillStyle = COLORS.text
   ctx.font = '600 30px Barlow, sans-serif'
-  ctx.fillText(`⏱ ${fmtDuracion(duracion)} · ${distanciaKm} km a ${velocidad} km/h`, pad, y)
+  ctx.fillText(`${fmtDuracion(duracion)} · ${distanciaKm} km a ${velocidad} km/h`, clockCx + clockR + 16, y)
 
   y += 60
   ctx.strokeStyle = COLORS.border

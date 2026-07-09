@@ -1,4 +1,5 @@
 import { useRegisterSW } from 'virtual:pwa-register/react'
+import Icon from './Icons.jsx'
 
 export default function ReloadPrompt() {
   const {
@@ -11,7 +12,7 @@ export default function ReloadPrompt() {
   return (
     <div className="reload-prompt" role="alert">
       <div className="reload-prompt__text">
-        <span className="reload-prompt__icon" aria-hidden="true">🚀</span>
+        <Icon name="refresh" size={20} className="reload-prompt__icon" />
         <span>
           <strong>Nueva versión disponible</strong>
           <span className="reload-prompt__sub"> — mejoras y correcciones listas</span>
@@ -31,7 +32,7 @@ export default function ReloadPrompt() {
           aria-label="Cerrar"
           onClick={() => setNeedRefresh(false)}
         >
-          ✕
+          <Icon name="close" size={16} />
         </button>
       </div>
     </div>

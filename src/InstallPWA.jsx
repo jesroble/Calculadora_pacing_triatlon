@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import Icon from './Icons.jsx'
 
 function isStandalone() {
   return (
@@ -31,7 +32,7 @@ function IOSGuide() {
       <ol className="install-guide__steps">
         <li>
           <span className="install-guide__step-icon">1</span>
-          <span>Pulsa el botón <strong>Compartir</strong> <span className="install-guide__symbol">⬆</span> en la barra inferior de Safari</span>
+          <span>Pulsa el botón <strong>Compartir</strong> <Icon name="share" size={15} className="install-guide__symbol" /> en la barra inferior de Safari</span>
         </li>
         <li>
           <span className="install-guide__step-icon">2</span>
@@ -109,7 +110,7 @@ export default function InstallPWA() {
             setDeferredPrompt(null)
           }}
         >
-          <span aria-hidden="true">📲</span> Instalar app
+          <Icon name="download" size={18} /> Instalar app
         </button>
       </div>
     )
@@ -125,7 +126,7 @@ export default function InstallPWA() {
           onClick={() => setShowGuide((v) => !v)}
           aria-expanded={showGuide}
         >
-          <span aria-hidden="true">📲</span> {showGuide ? 'Ocultar guía' : 'Cómo instalar'}
+          <Icon name="download" size={18} /> {showGuide ? 'Ocultar guía' : 'Cómo instalar'}
         </button>
         {showGuide && (ios ? <IOSGuide /> : <MacSafariGuide />)}
       </div>
