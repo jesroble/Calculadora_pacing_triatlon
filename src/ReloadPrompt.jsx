@@ -1,7 +1,9 @@
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import Icon from './Icons.jsx'
+import { useLanguage } from './i18n/LanguageContext.js'
 
 export default function ReloadPrompt() {
+  const { t } = useLanguage()
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
@@ -14,8 +16,8 @@ export default function ReloadPrompt() {
       <div className="reload-prompt__text">
         <Icon name="refresh" size={20} className="reload-prompt__icon" />
         <span>
-          <strong>Nueva versión disponible</strong>
-          <span className="reload-prompt__sub"> — mejoras y correcciones listas</span>
+          <strong>{t('reloadPrompt.title')}</strong>
+          <span className="reload-prompt__sub"> {t('reloadPrompt.subtitle')}</span>
         </span>
       </div>
       <div className="reload-prompt__actions">
@@ -24,12 +26,12 @@ export default function ReloadPrompt() {
           className="reload-prompt__btn reload-prompt__btn--update"
           onClick={() => updateServiceWorker(true)}
         >
-          Actualizar ahora
+          {t('reloadPrompt.updateButton')}
         </button>
         <button
           type="button"
           className="reload-prompt__btn reload-prompt__btn--dismiss"
-          aria-label="Cerrar"
+          aria-label={t('reloadPrompt.closeAriaLabel')}
           onClick={() => setNeedRefresh(false)}
         >
           <Icon name="close" size={16} />

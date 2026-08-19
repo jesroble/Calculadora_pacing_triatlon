@@ -32,7 +32,7 @@ function roundRect(ctx, x, y, w, h, r) {
 
 // Genera una imagen vertical (formato Instagram Stories) con el plan de pacing,
 // para que se pueda compartir/descargar como imagen en vez de solo texto.
-export async function generateShareImageBlob({ distancia, results, nutrition, peso, velocidad, duracion, distanciaKm, fmtDuracion }) {
+export async function generateShareImageBlob({ results, nutrition, peso, labels }) {
   if (document.fonts?.ready) {
     try { await document.fonts.ready } catch { /* sigue sin bloquear */ }
   }
@@ -71,7 +71,7 @@ export async function generateShareImageBlob({ distancia, results, nutrition, pe
 
   ctx.fillStyle = COLORS.muted
   ctx.font = '700 24px Barlow, sans-serif'
-  ctx.fillText('ENTRENADOR', pad + 160, y + 52)
+  ctx.fillText(labels.trainerBadge, pad + 160, y + 52)
   ctx.fillStyle = COLORS.text
   ctx.font = '700 32px "Barlow Condensed", sans-serif'
   ctx.fillText('Pablo Iglesias Navarrete', pad + 160, y + 96)
@@ -79,11 +79,11 @@ export async function generateShareImageBlob({ distancia, results, nutrition, pe
   y += 210
   ctx.fillStyle = COLORS.text
   ctx.font = '900 76px "Barlow Condensed", sans-serif'
-  ctx.fillText('Mi Pacing', pad, y)
+  ctx.fillText(labels.myPacing, pad, y)
   y += 68
   ctx.fillStyle = COLORS.accent2
   ctx.font = '700 44px "Barlow Condensed", sans-serif'
-  ctx.fillText(distancia === '70.3' ? 'Ironman 70.3' : 'Ironman Full', pad, y)
+  ctx.fillText(labels.raceName, pad, y)
 
   y += 70
   const gap = 20
@@ -91,10 +91,10 @@ export async function generateShareImageBlob({ distancia, results, nutrition, pe
   const cellH = 150
   const npWkg = results.np / (Number(peso) || 1)
   const metrics = [
-    { label: 'IF RECOMENDADO', value: results.ifRec.toFixed(2) },
-    { label: 'NP OBJETIVO', value: `${results.np.toFixed(0)}W` },
-    { label: 'NP W/KG', value: npWkg.toFixed(2) },
-    { label: 'TSS', value: `${nutrition.tss}` },
+    { label: labels.ifLabel, value: results.ifRec.toFixed(2) },
+    { label: labels.npLabel, value: `${results.np.toFixed(0)}W` },
+    { label: labels.npWkgLabel, value: npWkg.toFixed(2) },
+    { label: labels.tssLabel, value: `${nutrition.tss}` },
   ]
   const gridTop = y
   metrics.forEach((m, i) => {
@@ -118,13 +118,13 @@ export async function generateShareImageBlob({ distancia, results, nutrition, pe
 
   ctx.fillStyle = COLORS.muted
   ctx.font = '700 26px "Barlow Condensed", sans-serif'
-  ctx.fillText('PACING POR TERRENO', pad, y)
+  ctx.fillText(labels.terrainTitle, pad, y)
   y += 46
 
   const terrain = [
-    { name: 'Subidas', w: results.subidas, color: '#ff6b6b' },
-    { name: 'Llano', w: results.llano, color: COLORS.accent },
-    { name: 'Bajadas', w: results.bajadas, color: COLORS.green },
+    { name: labels.subidas, w: results.subidas, color: '#ff6b6b' },
+    { name: labels.llano, w: results.llano, color: COLORS.accent },
+    { name: labels.bajadas, w: results.bajadas, color: COLORS.green },
   ]
   for (const t of terrain) {
     ctx.fillStyle = COLORS.card2
@@ -144,15 +144,15 @@ export async function generateShareImageBlob({ distancia, results, nutrition, pe
   y += 36
   ctx.fillStyle = COLORS.muted
   ctx.font = '700 26px "Barlow Condensed", sans-serif'
-  ctx.fillText('NUTRICIÓN E HIDRATACIÓN / HORA', pad, y)
+  ctx.fillText(labels.nutritionTitle, pad, y)
   y += 46
 
   const nutriGap = 18
   const nutriW = (W - pad * 2 - nutriGap * 2) / 3
   const nutri = [
-    { label: 'Carbohidratos', value: `${nutrition.g_recomendados.toFixed(0)}g`, color: COLORS.accent2 },
-    { label: 'Líquidos', value: `${nutrition.ml_h}ml`, color: COLORS.green },
-    { label: 'Sodio', value: `${nutrition.mg_h}mg`, color: COLORS.green },
+    { label: labels.carbsLabel, value: `${nutrition.g_recomendados.toFixed(0)}g`, color: COLORS.accent2 },
+    { label: labels.liquidsLabel, value: `${nutrition.ml_h}ml`, color: COLORS.green },
+    { label: labels.sodiumLabel, value: `${nutrition.mg_h}mg`, color: COLORS.green },
   ]
   nutri.forEach((n, i) => {
     const cx = pad + i * (nutriW + nutriGap)
@@ -184,7 +184,7 @@ export async function generateShareImageBlob({ distancia, results, nutrition, pe
 
   ctx.fillStyle = COLORS.text
   ctx.font = '600 30px Barlow, sans-serif'
-  ctx.fillText(`${fmtDuracion(duracion)} · ${distanciaKm} km a ${velocidad} km/h`, clockCx + clockR + 16, y)
+  ctx.fillText(labels.durationLine, clockCx + clockR + 16, y)
 
   y += 60
   ctx.strokeStyle = COLORS.border
@@ -201,7 +201,7 @@ export async function generateShareImageBlob({ distancia, results, nutrition, pe
   ctx.fillStyle = COLORS.muted
   ctx.font = '600 24px Barlow, sans-serif'
   ctx.textAlign = 'right'
-  ctx.fillText('Calcula el tuyo gratis', W - pad, y)
+  ctx.fillText(labels.ctaFree, W - pad, y)
   ctx.textAlign = 'left'
 
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png'))

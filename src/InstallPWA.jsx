@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Icon from './Icons.jsx'
+import { useLanguage } from './i18n/LanguageContext.js'
 
 function isStandalone() {
   return (
@@ -26,21 +27,22 @@ function isMacSafari() {
 }
 
 function IOSGuide() {
+  const { t } = useLanguage()
   return (
     <div className="install-guide">
-      <p className="install-guide__title">Instalar en iPhone / iPad</p>
+      <p className="install-guide__title">{t('installPwa.iosTitle')}</p>
       <ol className="install-guide__steps">
         <li>
           <span className="install-guide__step-icon">1</span>
-          <span>Pulsa el botón <strong>Compartir</strong> <Icon name="share" size={15} className="install-guide__symbol" /> en la barra inferior de Safari</span>
+          <span>{t('installPwa.iosStep1Prefix')} <strong>{t('installPwa.iosStep1Button')}</strong> <Icon name="share" size={15} className="install-guide__symbol" /> {t('installPwa.iosStep1Suffix')}</span>
         </li>
         <li>
           <span className="install-guide__step-icon">2</span>
-          <span>Desplázate y toca <strong>«Añadir a pantalla de inicio»</strong></span>
+          <span>{t('installPwa.iosStep2Prefix')} <strong>{t('installPwa.iosStep2Button')}</strong></span>
         </li>
         <li>
           <span className="install-guide__step-icon">3</span>
-          <span>Pulsa <strong>«Añadir»</strong> — aparecerá el icono en tu pantalla</span>
+          <span>{t('installPwa.iosStep3Prefix')} <strong>{t('installPwa.iosStep3Button')}</strong> {t('installPwa.iosStep3Suffix')}</span>
         </li>
       </ol>
     </div>
@@ -48,29 +50,31 @@ function IOSGuide() {
 }
 
 function MacSafariGuide() {
+  const { t } = useLanguage()
   return (
     <div className="install-guide">
-      <p className="install-guide__title">Instalar en Mac con Safari</p>
+      <p className="install-guide__title">{t('installPwa.macTitle')}</p>
       <ol className="install-guide__steps">
         <li>
           <span className="install-guide__step-icon">1</span>
-          <span>En el menú superior de Safari, ve a <strong>Archivo</strong></span>
+          <span>{t('installPwa.macStep1Prefix')} <strong>{t('installPwa.macStep1Button')}</strong></span>
         </li>
         <li>
           <span className="install-guide__step-icon">2</span>
-          <span>Selecciona <strong>«Añadir al Dock...»</strong></span>
+          <span>{t('installPwa.macStep2Prefix')} <strong>{t('installPwa.macStep2Button')}</strong></span>
         </li>
         <li>
           <span className="install-guide__step-icon">3</span>
-          <span>Confirma pulsando <strong>«Añadir»</strong></span>
+          <span>{t('installPwa.macStep3Prefix')} <strong>{t('installPwa.macStep3Button')}</strong></span>
         </li>
       </ol>
-      <p className="install-guide__note">Requiere Safari 17 · macOS Sonoma o superior</p>
+      <p className="install-guide__note">{t('installPwa.macNote')}</p>
     </div>
   )
 }
 
 export default function InstallPWA() {
+  const { t } = useLanguage()
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [installed, setInstalled] = useState(isStandalone())
   const [showGuide, setShowGuide] = useState(false)
@@ -110,7 +114,7 @@ export default function InstallPWA() {
             setDeferredPrompt(null)
           }}
         >
-          <Icon name="download" size={18} /> Instalar app
+          <Icon name="download" size={18} /> {t('installPwa.installButton')}
         </button>
       </div>
     )
@@ -126,7 +130,7 @@ export default function InstallPWA() {
           onClick={() => setShowGuide((v) => !v)}
           aria-expanded={showGuide}
         >
-          <Icon name="download" size={18} /> {showGuide ? 'Ocultar guía' : 'Cómo instalar'}
+          <Icon name="download" size={18} /> {showGuide ? t('installPwa.hideGuide') : t('installPwa.showGuide')}
         </button>
         {showGuide && (ios ? <IOSGuide /> : <MacSafariGuide />)}
       </div>

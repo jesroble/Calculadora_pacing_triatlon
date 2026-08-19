@@ -2,8 +2,10 @@ import { useState, useMemo, useEffect } from 'react'
 import InstallPWA from './InstallPWA.jsx'
 import ReloadPrompt from './ReloadPrompt.jsx'
 import Icon from './Icons.jsx'
+import SEO from './SEO.jsx'
 import { generateShareImageBlob } from './shareImage.js'
 import { Analytics } from '@vercel/analytics/react'
+import { useLanguage } from './i18n/LanguageContext.js'
 
 // ---- IF Tables ----
 const DATA_703 = [
@@ -63,25 +65,6 @@ function fmtDuracion(h) {
   return `${horas}h ${mins}min`
 }
 
-const FAQS = [
-  {
-    q: "¿Qué es el IF?",
-    a: "El Intensity Factor (IF) es la ratio entre la Potencia Normalizada (NP) y el FTP del atleta. Indica la intensidad relativa del esfuerzo. En un Ironman 70.3 suele recomendarse un IF entre 0.70 y 0.85 según experiencia y condiciones."
-  },
-  {
-    q: "¿Cómo calcular el pacing para Ironman 70.3?",
-    a: "Necesitas conocer tu FTP (umbral de potencia funcional), peso corporal, experiencia en triatlón y el desnivel del circuito. La calculadora determina el IF recomendado y la Potencia Normalizada (NP) objetivo para que llegues al T2 con energía para correr."
-  },
-  {
-    q: "¿Cuál es la diferencia de pacing entre 70.3 e Ironman Full?",
-    a: "En Ironman Full el IF recomendado es considerablemente más bajo (0.60–0.72) que en 70.3 (0.66–0.85), ya que la distancia es el doble y hay que conservar energía para la maratón final de 42 km."
-  },
-  {
-    q: "¿Qué es el TSS?",
-    a: "El Training Stress Score (TSS) estima la carga fisiológica total de una sesión. Se calcula como: horas × IF² × 100. Un TSS por encima de 300 indica una prueba extremadamente exigente con alto riesgo de fatiga profunda."
-  }
-]
-
 const STORAGE_KEY = 'triatlonpacing:lastPlan'
 
 function loadLastPlan() {
@@ -106,6 +89,7 @@ function saveLastPlan(plan) {
 }
 
 export default function App() {
+  const { lang, setLang, t, tCat, locale } = useLanguage()
   const [distancia, setDistancia] = useState('70.3')
   const [ftp, setFtp] = useState(250)
   const [peso, setPeso] = useState(70)
@@ -234,13 +218,13 @@ export default function App() {
   const alerts = []
   if (results && nutrition) {
     if (distancia !== '70.3' && results.ifRec > 0.70)
-      alerts.push("IF elevado para Ironman Full. Riesgo alto de degradación en la maratón.")
+      alerts.push(t('alerts.ifFullHigh'))
     if (nutrition.tss > 300)
-      alerts.push("TSS muy elevado. Riesgo alto de fatiga acumulada.")
+      alerts.push(t('alerts.tssHigh'))
     if (nutrition.g_ch_ox > 220)
-      alerts.push("Demanda de carbohidratos extremadamente alta.")
+      alerts.push(t('alerts.carbsHigh'))
     if (nutrition.deficit_h > 140)
-      alerts.push("Déficit energético muy elevado para tu nivel de entrenamiento intestinal. Considera subir de nivel gradualmente.")
+      alerts.push(t('alerts.deficitHigh'))
   }
 
   // ---- Handlers ----
@@ -264,40 +248,61 @@ export default function App() {
 
   async function handleShare() {
     if (!results || !nutrition) return
+    const raceName = distancia === '70.3' ? t('share.raceName703') : t('share.raceNameFull')
     const texto = [
-      `📊 Pacing ${distancia === '70.3' ? 'Ironman 70.3' : 'Ironman Full'} — triatlonpacing.com`,
+      `📊 ${t('share.textHeaderPrefix')} ${raceName} — triatlonpacing.com`,
       `━━━━━━━━━━━━━━━━━━━━━`,
       `IF: ${results.ifRec.toFixed(2)} | NP: ${results.np.toFixed(0)}W | ${(results.np / (Number(peso) || 1)).toFixed(2)} W/kg`,
       `TSS: ${nutrition.tss} | ${nutrition.kj_totales.toFixed(0)} kJ`,
       ``,
-      `⛰️ Subidas: ${Math.round(results.subidas)}W`,
-      `➡️ Llano: ${Math.round(results.llano)}W`,
-      `⬇️ Bajadas: ${Math.round(results.bajadas)}W`,
+      `⛰️ ${tCat('terrain', 'Subidas')}: ${Math.round(results.subidas)}W`,
+      `➡️ ${tCat('terrain', 'Llano')}: ${Math.round(results.llano)}W`,
+      `⬇️ ${tCat('terrain', 'Bajadas')}: ${Math.round(results.bajadas)}W`,
       ``,
-      `🍌 CH: ${nutrition.g_recomendados.toFixed(0)}g/h | 💧 ${nutrition.ml_h}ml/h | 🧂 ${nutrition.mg_h}mg sodio/h`,
-      `⏱️ Tiempo estimado: ${fmtDuracion(duracion)} a ${velocidad} km/h`,
+      `🍌 CH: ${nutrition.g_recomendados.toFixed(0)}g/h | 💧 ${nutrition.ml_h}ml/h | 🧂 ${nutrition.mg_h}mg ${t('share.sodiumWord')}/h`,
+      `⏱️ ${t('race.tiempoLabel')}: ${fmtDuracion(duracion)} ${t('race.atConnector')} ${velocidad} km/h`,
       ``,
-      `Calcula el tuyo en triatlonpacing.com`,
+      `${t('share.ctaPrefix')} triatlonpacing.com`,
     ].join('\n')
 
     function fallbackTextShare() {
       if (navigator.share) {
-        navigator.share({ title: `Mi pacing ${distancia}`, text: texto, url: 'https://triatlonpacing.com' }).catch(() => {})
+        navigator.share({ title: `${t('share.myPacingPrefix')} ${distancia}`, text: texto, url: 'https://triatlonpacing.com' }).catch(() => {})
       } else {
         navigator.clipboard.writeText(texto).then(() => {
-          setShareMsg('¡Copiado al portapapeles!')
+          setShareMsg(t('share.copiedMsg'))
           setTimeout(() => setShareMsg(''), 3000)
         })
       }
     }
 
+    const labels = {
+      trainerBadge: t('share.image.trainerBadge'),
+      myPacing: t('share.image.myPacing'),
+      raceName,
+      ifLabel: t('share.image.ifLabel'),
+      npLabel: t('share.image.npLabel'),
+      npWkgLabel: t('share.image.npWkgLabel'),
+      tssLabel: t('share.image.tssLabel'),
+      terrainTitle: t('share.image.terrainTitle'),
+      subidas: tCat('terrain', 'Subidas'),
+      llano: tCat('terrain', 'Llano'),
+      bajadas: tCat('terrain', 'Bajadas'),
+      nutritionTitle: t('share.image.nutritionTitle'),
+      carbsLabel: t('share.image.carbsLabel'),
+      liquidsLabel: t('share.image.liquidsLabel'),
+      sodiumLabel: t('share.image.sodiumLabel'),
+      ctaFree: t('share.image.ctaFree'),
+      durationLine: `${fmtDuracion(duracion)} · ${distanciaKm} km ${t('race.atConnector')} ${velocidad} km/h`,
+    }
+
     setSharing(true)
     try {
-      const blob = await generateShareImageBlob({ distancia, results, nutrition, peso, velocidad, duracion, distanciaKm, fmtDuracion })
+      const blob = await generateShareImageBlob({ results, nutrition, peso, labels })
       const file = new File([blob], 'mi-pacing-triatlonpacing.png', { type: 'image/png' })
 
       if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: `Mi pacing ${distancia}`, text: texto })
+        await navigator.share({ files: [file], title: `${t('share.myPacingPrefix')} ${distancia}`, text: texto })
         return
       }
 
@@ -310,7 +315,7 @@ export default function App() {
       a.remove()
       URL.revokeObjectURL(url)
       await navigator.clipboard?.writeText(texto)
-      setShareMsg('¡Imagen descargada y texto copiado!')
+      setShareMsg(t('share.downloadedMsg'))
       setTimeout(() => setShareMsg(''), 3500)
     } catch (err) {
       if (err?.name !== 'AbortError') fallbackTextShare()
@@ -321,19 +326,31 @@ export default function App() {
 
   return (
     <>
+      <SEO />
       {/* HERO */}
       <header className="hero" role="banner">
-        <div className="hero-tag fade-up delay-1">Herramienta Profesional Gratuita</div>
+        <div className="lang-toggle tab-group" role="radiogroup" aria-label="Idioma / Language">
+          {['es', 'en'].map(l => (
+            <button
+              key={l}
+              className={`tab-btn${lang === l ? ' active' : ''}`}
+              onClick={() => setLang(l)}
+              role="radio"
+              aria-checked={lang === l}
+            >{l.toUpperCase()}</button>
+          ))}
+        </div>
+        <div className="hero-tag fade-up delay-1">{t('hero.badge')}</div>
         <h1 className="fade-up delay-1">
-          Calculadora de<br /><span>Pacing Triatlón</span>
+          {t('hero.titleLine1')}<br /><span>{t('hero.titleLine2')}</span>
         </h1>
-        <p className="hero-sub fade-up delay-2">Ironman 70.3 · Ironman Full</p>
+        <p className="hero-sub fade-up delay-2">{t('hero.subtitle')}</p>
         <p className="hero-author fade-up delay-2">
-          Creada por <strong><a href="https://entrenador-deportes-cicl-h5zi3vi.gamma.site/#card-9bg9tkkaby8ezxr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none' }}>Pablo Iglesias Navarrete</a></strong><br />
-          Entrenador Nacional de Triatlón y Natación
+          {t('hero.authorPrefix')} <strong><a href="https://entrenador-deportes-cicl-h5zi3vi.gamma.site/#card-9bg9tkkaby8ezxr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none' }}>Pablo Iglesias Navarrete</a></strong><br />
+          {t('hero.authorRole')}
         </p>
         <p className="hero-bizum fade-up delay-2">
-          <img src="/bizum-logo.svg" alt="Logo Bizum" style={{ width: '48px', height: '48px', verticalAlign: 'middle', marginLeft: '8px', marginRight: '8px'}} /> Si esta herramienta te ayuda, puedes invitarme a un café o colaborar por Bizum · <strong><a href="tel:+34600254690" style={{ color: 'inherit', textDecoration: 'underline' }}>600 254 690</a></strong>
+          <img src="/bizum-logo.svg" alt={t('hero.bizumAlt')} style={{ width: '48px', height: '48px', verticalAlign: 'middle', marginLeft: '8px', marginRight: '8px'}} /> {t('hero.bizumText')} <strong><a href="tel:+34600254690" style={{ color: 'inherit', textDecoration: 'underline' }}>600 254 690</a></strong>
         </p>
         <InstallPWA />
       </header>
@@ -342,13 +359,13 @@ export default function App() {
 
         {/* CALCULADORA */}
         <section aria-labelledby="calc-title" style={{marginTop:'40px'}}>
-          <p className="section-label" id="calc-title">Datos del atleta</p>
+          <p className="section-label" id="calc-title">{t('athlete.sectionLabel')}</p>
 
           {/* DISTANCIA */}
           <div className="form-card fade-up">
             <div className="field">
-              <label>Distancia</label>
-              <div className="tab-group" role="radiogroup" aria-label="Distancia del triatlón">
+              <label>{t('athlete.distanceLabel')}</label>
+              <div className="tab-group" role="radiogroup" aria-label={t('athlete.distanceAriaLabel')}>
                 {['70.3', 'Ironman Full'].map(d => (
                   <button
                     key={d}
@@ -356,7 +373,7 @@ export default function App() {
                     onClick={() => handleDistanciaChange(d)}
                     role="radio"
                     aria-checked={distancia === d}
-                  >{d}</button>
+                  >{tCat('distancia', d)}</button>
                 ))}
               </div>
             </div>
@@ -366,7 +383,7 @@ export default function App() {
           <div className="form-card fade-up">
             <div className="grid-2">
               <div className="field">
-                <label htmlFor="ftp">FTP (vatios)</label>
+                <label htmlFor="ftp">{t('athlete.ftpLabel')}</label>
                 <input
                   id="ftp"
                   type="number"
@@ -376,11 +393,11 @@ export default function App() {
                   aria-describedby="ftp-hint"
                 />
                 <span className="hint" id="ftp-hint">
-                  Tu umbral de potencia funcional · <strong style={{color:'var(--accent)'}}>{wkg.toFixed(2)} W/kg</strong>
+                  {t('athlete.ftpHintPrefix')} <strong style={{color:'var(--accent)'}}>{wkg.toFixed(2)} W/kg</strong>
                 </span>
               </div>
               <div className="field">
-                <label htmlFor="peso">Peso corporal (kg)</label>
+                <label htmlFor="peso">{t('athlete.pesoLabel')}</label>
                 <input
                   id="peso"
                   type="number"
@@ -395,9 +412,9 @@ export default function App() {
           {/* GRASA */}
           <div className="form-card fade-up">
             <div className="field" style={{marginBottom:'16px'}}>
-              <label>¿Tienes el dato de % de grasa corporal?</label>
+              <label>{t('athlete.fatQuestion')}</label>
               <div className="radio-group" role="radiogroup">
-                {[['no','No'], ['si','Sí']].map(([val, label]) => (
+                {[['no', t('athlete.fatNo')], ['si', t('athlete.fatYes')]].map(([val, label]) => (
                   <div
                     key={val}
                     className={`radio-opt${tieneGrasa === val ? ' active' : ''}`}
@@ -416,7 +433,7 @@ export default function App() {
 
             {tieneGrasa === 'si' && (
               <div className="field">
-                <label htmlFor="grasa">Porcentaje de grasa (%)</label>
+                <label htmlFor="grasa">{t('athlete.fatPercentLabel')}</label>
                 <input
                   id="grasa"
                   type="number"
@@ -425,15 +442,15 @@ export default function App() {
                   onChange={e => setGrasa(e.target.value === '' ? '' : Number(e.target.value))}
                 />
                 <span className="hint">
-                  Perfil: <strong style={{color:'var(--accent)'}}>{categoriaPeso}</strong>
-                  {pesoMagro && ` · Peso magro: ${pesoMagro.toFixed(1)} kg`}
+                  {t('athlete.profilePrefix')} <strong style={{color:'var(--accent)'}}>{tCat('categoriaPeso', categoriaPeso)}</strong>
+                  {pesoMagro && ` · ${t('athlete.leanWeightPrefix')} ${pesoMagro.toFixed(1)} kg`}
                 </span>
               </div>
             )}
 
             {tieneGrasa === 'no' && (
               <p style={{fontSize:'0.85rem', color:'var(--muted)'}}>
-                Sin dato de grasa el perfil se basa solo en W/kg: <strong style={{color:'var(--accent)'}}>{categoriaPeso}</strong>. Para mayor precisión, mide tu % con báscula o caliper.
+                {t('athlete.noFatPrefix')} <strong style={{color:'var(--accent)'}}>{tCat('categoriaPeso', categoriaPeso)}</strong>{t('athlete.noFatSuffix')}
               </p>
             )}
           </div>
@@ -441,8 +458,8 @@ export default function App() {
           {/* EXPERIENCIA */}
           <div className="form-card fade-up">
             <div className="field">
-              <label>Experiencia en triatlón</label>
-              <div className="tab-group" role="radiogroup" aria-label="Nivel de experiencia">
+              <label>{t('athlete.experienceLabel')}</label>
+              <div className="tab-group" role="radiogroup" aria-label={t('athlete.experienceAriaLabel')}>
                 {['Baja','Media','Alta'].map(e => (
                   <button
                     key={e}
@@ -450,7 +467,7 @@ export default function App() {
                     onClick={() => setExperiencia(e)}
                     role="radio"
                     aria-checked={experiencia === e}
-                  >{e}</button>
+                  >{tCat('experiencia', e)}</button>
                 ))}
               </div>
             </div>
@@ -460,30 +477,30 @@ export default function App() {
 
         {/* DATOS PRUEBA */}
         <section aria-labelledby="prueba-title" style={{marginTop:'32px'}}>
-          <p className="section-label" id="prueba-title">Datos de la prueba</p>
+          <p className="section-label" id="prueba-title">{t('race.sectionLabel')}</p>
 
           {/* SELECTOR DE CARRERA */}
           <div className="form-card fade-up">
             <div className="field">
-              <label htmlFor="carrera">Selecciona tu carrera (opcional)</label>
+              <label htmlFor="carrera">{t('race.selectLabel')}</label>
               <select
                 id="carrera"
                 value={carreraSeleccionada}
                 onChange={handleCarreraChange}
               >
-                <option value="">Personalizado — introduce el desnivel manualmente</option>
-                <optgroup label="Ironman 70.3">
+                <option value="">{t('race.customOption')}</option>
+                <optgroup label={t('race.optgroup703')}>
                   {CARRERAS_703.map(c => (
-                    <option key={c.value} value={c.value}>{c.label} · {c.desnivel}m desnivel</option>
+                    <option key={c.value} value={c.value}>{c.label} · {c.desnivel}m {t('race.elevationSuffix')}</option>
                   ))}
                 </optgroup>
-                <optgroup label="Ironman Full">
+                <optgroup label={t('race.optgroupFull')}>
                   {CARRERAS_FULL.map(c => (
-                    <option key={c.value} value={c.value}>{c.label} · {c.desnivel}m desnivel</option>
+                    <option key={c.value} value={c.value}>{c.label} · {c.desnivel}m {t('race.elevationSuffix')}</option>
                   ))}
                 </optgroup>
               </select>
-              <span className="hint">Rellena automáticamente la distancia y el desnivel de la carrera</span>
+              <span className="hint">{t('race.raceSelectHint')}</span>
             </div>
           </div>
 
@@ -491,7 +508,7 @@ export default function App() {
           <div className="form-card fade-up">
             <div className="grid-2">
               <div className="field">
-                <label htmlFor="desnivel">Desnivel acumulado (m)</label>
+                <label htmlFor="desnivel">{t('race.desnivelLabel')}</label>
                 <input
                   id="desnivel"
                   type="number"
@@ -503,23 +520,21 @@ export default function App() {
                   }}
                 />
                 <span className="hint">
-                  Categoría calculada: <strong style={{color:'var(--accent)'}}>{desnivelCat}</strong>
-                  {distancia === '70.3'
-                    ? ' · (70.3: <800m Bajo · 800–1500m Medio · >1500m Alto)'
-                    : ' · (Full: <1500m Bajo · 1500–3000m Medio · >3000m Alto)'}
+                  {t('race.desnivelCatPrefix')} <strong style={{color:'var(--accent)'}}>{tCat('desnivelCat', desnivelCat)}</strong>
+                  {' '}{distancia === '70.3' ? t('race.desnivelHint703') : t('race.desnivelHintFull')}
                 </span>
               </div>
               <div className="field">
-                <label>Temperatura carrera</label>
-                <div className="tab-group" role="radiogroup" aria-label="Temperatura ambiental">
-                  {['Fría','Moderada','Calor'].map(t => (
+                <label>{t('race.tempLabel')}</label>
+                <div className="tab-group" role="radiogroup" aria-label={t('race.tempAriaLabel')}>
+                  {['Fría','Moderada','Calor'].map(tp => (
                     <button
-                      key={t}
-                      className={`tab-btn${temp === t ? ' active' : ''}`}
-                      onClick={() => setTemp(t)}
+                      key={tp}
+                      className={`tab-btn${temp === tp ? ' active' : ''}`}
+                      onClick={() => setTemp(tp)}
                       role="radio"
-                      aria-checked={temp === t}
-                    >{t}</button>
+                      aria-checked={temp === tp}
+                    >{tCat('temp', tp)}</button>
                   ))}
                 </div>
               </div>
@@ -531,27 +546,27 @@ export default function App() {
             <div className="form-card fade-up">
               <div className="grid-2">
                 <div className="field">
-                  <label>Velocidad estimada ciclismo</label>
+                  <label>{t('race.velocidadLabel')}</label>
                   <input
                     type="number"
                     min="15" max="60" step="0.5"
                     value={velocidad}
                     onChange={e => setVelocidadOverride(e.target.value === '' ? null : Number(e.target.value))}
-                    aria-label="Velocidad media en km/h"
+                    aria-label={t('race.velocidadAriaLabel')}
                   />
                   {velocidadOverride === null ? (
-                    <span className="hint">Calculada según W/kg, experiencia y desnivel · Ajusta si la conoces</span>
+                    <span className="hint">{t('race.velocidadHint')}</span>
                   ) : (
                     <span className="hint">
                       <button
                         onClick={() => setVelocidadOverride(null)}
                         style={{background:'none', border:'none', color:'var(--muted)', cursor:'pointer', padding:'0', fontSize:'inherit', textDecoration:'underline'}}
-                      >↩ Restablecer estimación ({velocidadEstimada} km/h)</button>
+                      >{t('race.resetVelocidad')} ({velocidadEstimada} km/h)</button>
                     </span>
                   )}
                 </div>
                 <div className="field">
-                  <label>Tiempo estimado</label>
+                  <label>{t('race.tiempoLabel')}</label>
                   <div style={{
                     background:'var(--card2)', border:'1px solid var(--border)', borderRadius:'10px',
                     padding:'12px 16px', fontSize:'1.6rem', fontFamily:'var(--font-display)',
@@ -559,7 +574,7 @@ export default function App() {
                   }}>
                     {fmtDuracion(duracion)}
                   </div>
-                  <span className="hint">{distanciaKm} km a {velocidad} km/h</span>
+                  <span className="hint">{distanciaKm} km {t('race.atConnector')} {velocidad} km/h</span>
                 </div>
               </div>
             </div>
@@ -572,20 +587,20 @@ export default function App() {
             <section aria-labelledby="progress-title" className="progress-card fade-up" style={{marginTop:'32px'}}>
               <p className="progress-card__title" id="progress-title">
                 <Icon name="trendingUp" size={18} className="title-icon" />
-                Tu progreso desde el {new Date(previousPlan.savedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+                {t('progress.titlePrefix')} {new Date(previousPlan.savedAt).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })}
               </p>
               {[
-                { label: 'FTP', prev: previousPlan.ftp, now: Number(ftp) || 0, unit: 'W' },
-                { label: 'W/kg FTP', prev: previousPlan.wkg, now: wkg, unit: '', digits: 2 },
+                { id: 'ftp', label: t('progress.ftpLabel'), prev: previousPlan.ftp, now: Number(ftp) || 0, unit: 'W' },
+                { id: 'wkgFtp', label: t('progress.wkgFtpLabel'), prev: previousPlan.wkg, now: wkg, unit: '', digits: 2 },
                 ...(sameDistanciaQuePrevio ? [
-                  { label: 'NP objetivo', prev: previousPlan.np, now: results.np, unit: 'W' },
-                  { label: 'IF recomendado', prev: previousPlan.ifRec, now: results.ifRec, unit: '', digits: 2 },
+                  { id: 'npObjetivo', label: t('progress.npObjetivoLabel'), prev: previousPlan.np, now: results.np, unit: 'W' },
+                  { id: 'ifRecomendado', label: t('progress.ifRecomendadoLabel'), prev: previousPlan.ifRec, now: results.ifRec, unit: '', digits: 2 },
                 ] : []),
-              ].map(({ label, prev, now, unit, digits = 0 }) => {
+              ].map(({ id, label, prev, now, unit, digits = 0 }) => {
                 const delta = now - prev
                 const dir = delta > 0.005 ? 'up' : delta < -0.005 ? 'down' : 'flat'
                 return (
-                  <div className="progress-row" key={label}>
+                  <div className="progress-row" key={id}>
                     <span>{label}</span>
                     <span>
                       {prev.toFixed(digits)}{unit} → <strong>{now.toFixed(digits)}{unit}</strong>{' '}
@@ -600,69 +615,69 @@ export default function App() {
               })}
               {!sameDistanciaQuePrevio && (
                 <p className="progress-note">
-                  Tu plan anterior era para {previousPlan.distancia === '70.3' ? 'Ironman 70.3' : 'Ironman Full'} — por eso solo comparamos FTP y W/kg.
+                  {t('progress.notePrefix')} {tCat('distancia', previousPlan.distancia)} {t('progress.noteSuffix')}
                 </p>
               )}
             </section>
           )}
 
           <section aria-labelledby="results-title" className="results-card fade-up" style={{marginTop: previousPlan ? '20px' : '32px'}}>
-            <h2 className="results-title" id="results-title"><Icon name="gauge" size={22} className="title-icon" />Tu Pacing Óptimo</h2>
+            <h2 className="results-title" id="results-title"><Icon name="gauge" size={22} className="title-icon" />{t('results.title')}</h2>
 
             <div className="metrics-grid">
               <div className="metric">
                 <div className="metric-value">{results.ifRec.toFixed(2)}</div>
-                <div className="metric-label">IF Recomendado</div>
+                <div className="metric-label">{t('results.ifRecomendado')}</div>
               </div>
               <div className="metric">
                 <div className="metric-value">{results.np.toFixed(0)}W</div>
-                <div className="metric-label">NP Objetivo</div>
+                <div className="metric-label">{t('results.npObjetivo')}</div>
               </div>
               <div className="metric">
                 <div className="metric-value">{wkg.toFixed(2)}</div>
-                <div className="metric-label">FTP W/kg</div>
+                <div className="metric-label">{t('results.ftpWkg')}</div>
               </div>
               <div className="metric">
                 <div className="metric-value">{(results.np / (Number(peso) || 1)).toFixed(2)}</div>
-                <div className="metric-label">NP W/kg</div>
+                <div className="metric-label">{t('results.npWkg')}</div>
               </div>
               <div className="metric">
                 <div className="metric-value">{nutrition.kj_totales.toFixed(0)}</div>
-                <div className="metric-label">kJ totales</div>
+                <div className="metric-label">{t('results.kjTotales')}</div>
               </div>
               <div className="metric">
                 <div className="metric-value">{nutrition.tss}</div>
-                <div className="metric-label">TSS</div>
+                <div className="metric-label">{t('results.tss')}</div>
               </div>
               {pesoMagro && (
                 <>
                   <div className="metric">
                     <div className="metric-value">{(ftp / pesoMagro).toFixed(2)}</div>
-                    <div className="metric-label">FTP W/kg magro</div>
+                    <div className="metric-label">{t('results.ftpWkgMagro')}</div>
                   </div>
                   <div className="metric">
                     <div className="metric-value">{(results.np / pesoMagro).toFixed(2)}</div>
-                    <div className="metric-label">NP W/kg magro</div>
+                    <div className="metric-label">{t('results.npWkgMagro')}</div>
                   </div>
                 </>
               )}
             </div>
 
             <p style={{fontSize:'0.82rem', color:'var(--muted)', marginBottom:'20px'}}>
-              Rango IF recomendado: <strong style={{color:'var(--text)'}}>{results.ifMin.toFixed(2)} — {results.ifMax.toFixed(2)}</strong>
-              {' · '}Perfil atleta: <strong style={{color:'var(--accent)'}}>{categoriaPeso}</strong>
+              {t('results.ifRangePrefix')} <strong style={{color:'var(--text)'}}>{results.ifMin.toFixed(2)} — {results.ifMax.toFixed(2)}</strong>
+              {' · '}{t('results.athleteProfilePrefix')} <strong style={{color:'var(--accent)'}}>{tCat('categoriaPeso', categoriaPeso)}</strong>
             </p>
 
             <div className="terrain-section">
-              <p className="terrain-title">Pacing por tipo de terreno</p>
+              <p className="terrain-title">{t('results.terrainTitle')}</p>
               {[
                 { icon: 'mountain',       name: 'Subidas', w: results.subidas, color: '#ff7a6b' },
                 { icon: 'arrowRight',     name: 'Llano',   w: results.llano,   color: '#00d4ff' },
                 { icon: 'arrowDownRight', name: 'Bajadas', w: results.bajadas, color: '#00e676' },
               ].map(({ icon, name, w, color }) => (
-                <div className="terrain-row" key={name}>
+                <div className="terrain-row" key={icon}>
                   <span className="terrain-icon" style={{ color }}><Icon name={icon} size={20} /></span>
-                  <span className="terrain-name">{name}</span>
+                  <span className="terrain-name">{tCat('terrain', name)}</span>
                   <span className="terrain-watts" style={{ color }}>{Math.round(w)}W</span>
                   <span className="terrain-wkg">{(w / (Number(peso) || 1)).toFixed(2)} W/kg</span>
                 </div>
@@ -672,8 +687,8 @@ export default function App() {
 
           <div className="form-card fade-up">
             <div className="field">
-              <label>Entrenamiento intestinal (Gut Training)</label>
-              <div className="tab-group" role="radiogroup" aria-label="Nivel de entrenamiento intestinal">
+              <label>{t('gut.label')}</label>
+              <div className="tab-group" role="radiogroup" aria-label={t('gut.ariaLabel')}>
                 {['Bajo','Medio','Alto','Elite'].map(g => (
                   <button
                     key={g}
@@ -681,10 +696,10 @@ export default function App() {
                     onClick={() => setGut(g)}
                     role="radio"
                     aria-checked={gut === g}
-                  >{g}</button>
+                  >{tCat('gut', g)}</button>
                 ))}
               </div>
-              <span className="hint">Capacidad del intestino para absorber carbohidratos durante el esfuerzo</span>
+              <span className="hint">{t('gut.hint')}</span>
             </div>
           </div>
         </>)}
@@ -692,54 +707,54 @@ export default function App() {
         {/* NUTRICIÓN E HIDRATACIÓN */}
         {nutrition && (
           <section aria-labelledby="nutrition-title" className="results-card nutrition fade-up">
-            <h2 className="results-title" id="nutrition-title" style={{color:'var(--accent2)'}}><Icon name="droplet" size={22} className="title-icon" />Nutrición e Hidratación</h2>
+            <h2 className="results-title" id="nutrition-title" style={{color:'var(--accent2)'}}><Icon name="droplet" size={22} className="title-icon" />{t('nutrition.title')}</h2>
 
             <div className="nutrition-grid">
               {/* CARBOHIDRATOS */}
               <div>
-                <p className="terrain-title" style={{marginBottom:'16px'}}>Carbohidratos</p>
+                <p className="terrain-title" style={{marginBottom:'16px'}}>{t('nutrition.carbsTitle')}</p>
                 <div className="metrics-grid" style={{gridTemplateColumns:'repeat(auto-fit, minmax(120px, 1fr))'}}>
                   <div className="metric">
                     <div className="metric-value" style={{color:'var(--accent2)'}}>{nutrition.g_ch_ox.toFixed(0)}</div>
-                    <div className="metric-label">g oxidación/h</div>
+                    <div className="metric-label">{t('nutrition.oxidationLabel')}</div>
                   </div>
                   <div className="metric">
                     <div className="metric-value" style={{color:'var(--accent2)'}}>{nutrition.g_recomendados.toFixed(0)}</div>
-                    <div className="metric-label">g ingesta/h</div>
+                    <div className="metric-label">{t('nutrition.intakeLabel')}</div>
                   </div>
                   <div className="metric">
                     <div className="metric-value" style={{color:'var(--accent2)'}}>{nutrition.total_ch.toFixed(0)}</div>
-                    <div className="metric-label">g CH totales</div>
+                    <div className="metric-label">{t('nutrition.totalChLabel')}</div>
                   </div>
                   <div className="metric">
                     <div className="metric-value" style={{color:'#ffd166'}}>{nutrition.deficit_h.toFixed(0)}</div>
-                    <div className="metric-label">g déficit/h</div>
+                    <div className="metric-label">{t('nutrition.deficitLabel')}</div>
                   </div>
                 </div>
                 <p style={{fontSize:'0.8rem', color:'var(--muted)', marginTop:'10px'}}>
-                  No es posible reponer el 100% del gasto. El déficit es fisiológicamente normal en competición.
+                  {t('nutrition.deficitNote')}
                 </p>
               </div>
 
               {/* HIDRATACIÓN */}
               <div>
-                <p className="terrain-title" style={{marginBottom:'16px'}}>Hidratación</p>
+                <p className="terrain-title" style={{marginBottom:'16px'}}>{t('nutrition.hydrationTitle')}</p>
                 <div className="metrics-grid" style={{gridTemplateColumns:'repeat(auto-fit, minmax(120px, 1fr))'}}>
                   <div className="metric">
                     <div className="metric-value" style={{color:'var(--green)'}}>{nutrition.ml_h}</div>
-                    <div className="metric-label">ml / hora</div>
+                    <div className="metric-label">{t('nutrition.mlHourLabel')}</div>
                   </div>
                   <div className="metric">
                     <div className="metric-value" style={{color:'var(--green)'}}>{nutrition.total_liq.toFixed(0)}</div>
-                    <div className="metric-label">ml totales</div>
+                    <div className="metric-label">{t('nutrition.mlTotalLabel')}</div>
                   </div>
                   <div className="metric">
                     <div className="metric-value" style={{color:'var(--green)'}}>{nutrition.mg_h}</div>
-                    <div className="metric-label">mg sodio/h</div>
+                    <div className="metric-label">{t('nutrition.sodiumHourLabel')}</div>
                   </div>
                   <div className="metric">
                     <div className="metric-value" style={{color:'var(--green)'}}>{nutrition.total_sodio.toFixed(0)}</div>
-                    <div className="metric-label">mg sodio total</div>
+                    <div className="metric-label">{t('nutrition.sodiumTotalLabel')}</div>
                   </div>
                 </div>
               </div>
@@ -747,30 +762,30 @@ export default function App() {
 
             {/* PLAN CADA 20 MIN */}
             <div style={{borderTop:'1px solid var(--border)', marginTop:'24px', paddingTop:'20px'}}>
-              <p className="terrain-title" style={{marginBottom:'14px'}}>Plan cada 20 minutos</p>
+              <p className="terrain-title" style={{marginBottom:'14px'}}>{t('nutrition.planTitle')}</p>
               <div className="metrics-grid" style={{gridTemplateColumns:'repeat(3, 1fr)'}}>
                 <div className="metric">
                   <div className="metric-value" style={{color:'var(--accent2)'}}>{nutrition.ch_20.toFixed(0)}</div>
-                  <div className="metric-label">g CH</div>
+                  <div className="metric-label">{t('nutrition.chLabel')}</div>
                 </div>
                 <div className="metric">
                   <div className="metric-value" style={{color:'var(--green)'}}>{nutrition.liq_20.toFixed(0)}</div>
-                  <div className="metric-label">ml líquidos</div>
+                  <div className="metric-label">{t('nutrition.liquidsLabel')}</div>
                 </div>
                 <div className="metric">
                   <div className="metric-value" style={{color:'var(--green)'}}>{nutrition.sodio_20.toFixed(0)}</div>
-                  <div className="metric-label">mg sodio</div>
+                  <div className="metric-label">{t('nutrition.sodiumLabel')}</div>
                 </div>
               </div>
             </div>
 
             {/* COMPARTIR */}
             <div style={{borderTop:'1px solid var(--border)', marginTop:'24px', paddingTop:'20px'}}>
-              <button className="share-btn" onClick={handleShare} disabled={sharing} aria-label="Compartir o descargar mi plan de carrera como imagen">
+              <button className="share-btn" onClick={handleShare} disabled={sharing} aria-label={t('nutrition.shareAriaLabel')}>
                 <Icon name="camera" size={20} />
-                {sharing ? 'Generando imagen…' : (shareMsg || 'Compartir mi plan como imagen')}
+                {sharing ? t('nutrition.generatingImage') : (shareMsg || t('nutrition.shareButtonText'))}
               </button>
-              <p className="hint" style={{textAlign:'center', marginTop:'10px'}}>Ideal para compartir en tus stories</p>
+              <p className="hint" style={{textAlign:'center', marginTop:'10px'}}>{t('nutrition.shareHint')}</p>
             </div>
           </section>
         )}
@@ -778,7 +793,7 @@ export default function App() {
         {/* ALERTAS FISIOLÓGICAS */}
         {alerts.length > 0 && (
           <section aria-labelledby="alerts-title" style={{marginBottom:'24px'}}>
-            <p className="section-label" id="alerts-title">Análisis fisiológico</p>
+            <p className="section-label" id="alerts-title">{t('alerts.sectionLabel')}</p>
             {alerts.map((msg, i) => (
               <div key={i} className="alert-card"><Icon name="alert" size={20} /><span>{msg}</span></div>
             ))}
@@ -787,18 +802,11 @@ export default function App() {
 
         {/* ENTRENA CONMIGO */}
         <section aria-labelledby="cta-title" className="cta-card fade-up">
-          <h2 id="cta-title">Entrena Conmigo</h2>
-          <p>Planificación científica personalizada para triatletas de todos los niveles</p>
+          <h2 id="cta-title">{t('cta.title')}</h2>
+          <p>{t('cta.subtitle')}</p>
           <div className="services-grid">
-            {[
-              { icon: 'swim',      title: 'Natación técnica', desc: 'Eficiencia y técnica para el segmento más temido' },
-              { icon: 'bike',      title: 'Ciclismo y pacing', desc: 'Control del esfuerzo y potencia en carretera' },
-              { icon: 'run',       title: 'Carrera a pie', desc: 'Gestión de carga y ritmo en la maratón' },
-              { icon: 'clipboard', title: 'Planificación científica', desc: 'Seguimiento semanal con datos reales' },
-              { icon: 'activity',  title: 'Análisis de datos', desc: 'W/kg, NP, TSS, IF, HRV y más métricas' },
-              { icon: 'leaf',      title: 'Adaptación total', desc: 'Compatible con tu vida, trabajo y familia' },
-            ].map(s => (
-              <div className="service-item" key={s.title}>
+            {t('cta.services').map(s => (
+              <div className="service-item" key={s.icon}>
                 <span className="service-icon"><Icon name={s.icon} size={22} /></span>
                 <div className="service-text">
                   <strong>{s.title}</strong>
@@ -813,16 +821,16 @@ export default function App() {
             rel="noopener noreferrer"
             className="cta-btn"
             style={{ background: 'var(--green)', marginTop: '16px' }}
-            aria-label="Visitar el blog de Pablo Iglesias Navarrete para ver tarifas y servicios"
+            aria-label={t('cta.linkAriaLabel')}
           >
-            Ver Tarifas y Servicios
+            {t('cta.linkText')}
           </a>
         </section>
 
         {/* FAQ */}
         <section aria-labelledby="faq-title" className="faq-section">
-          <p className="section-label" id="faq-title">Preguntas Frecuentes</p>
-          {FAQS.map((f, i) => (
+          <p className="section-label" id="faq-title">{t('faq.title')}</p>
+          {t('faq.items').map((f, i) => (
             <article key={i} className={`faq-item${openFaq === i ? ' open' : ''}`}>
               <button
                 className="faq-q"
@@ -840,11 +848,11 @@ export default function App() {
       </main>
 
       <footer role="contentinfo">
-        <img src="/logo.png" alt="Logo Pablo Iglesias Navarrete — Entrenador Triatlón" className="hero-logo fade-up" />
-        <p>© {new Date().getFullYear()} Pablo Iglesias Navarrete · Entrenador Nacional de Triatlón y Natación</p>
+        <img src="/logo.png" alt={t('footer.logoAlt')} className="hero-logo fade-up" />
+        <p>© {new Date().getFullYear()} {t('footer.copyrightSuffix')}</p>
         <p style={{marginTop:'4px', display:'inline-flex', alignItems:'center', gap:'6px', flexWrap:'wrap', justifyContent:'center'}}>
           <Icon name="phone" size={15} style={{ verticalAlign: 'middle' }} />
-          <a href="tel:+34600254690" style={{ color: 'inherit', textDecoration: 'underline' }}>600 254 690</a> · Herramienta gratuita de pacing para triatlón
+          <a href="tel:+34600254690" style={{ color: 'inherit', textDecoration: 'underline' }}>600 254 690</a> {t('footer.tagline')}
         </p>
       </footer>
 

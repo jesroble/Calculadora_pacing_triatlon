@@ -47,6 +47,17 @@ body {
   background: radial-gradient(ellipse 70% 55% at 50% -20%, rgba(52,201,230,0.06) 0%, transparent 65%);
   pointer-events: none;
 }
+.lang-toggle {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  gap: 6px;
+}
+.lang-toggle .tab-btn {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
 .hero-logo { width: 84px; height: 84px; object-fit: contain; margin-bottom: 20px; }
 .hero-tag {
   display: inline-flex;
