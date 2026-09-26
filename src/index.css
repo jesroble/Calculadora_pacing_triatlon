@@ -42,10 +42,9 @@ body {
 }
 
 .hero-image {
+  width: 100%;
   max-width: 420px;
-  width: 200%;
-  height: 120%;
-  max-height: 300px;
+  height: 80%;
   border-radius: 16px;
   margin: 0 auto 20px;
   display: block;
