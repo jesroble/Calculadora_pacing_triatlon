@@ -342,7 +342,7 @@ export default function App() {
         </div>
             <div className="hero-tag fade-up delay-1">{t('hero.badge')}</div>
         <img
-          src="/triatlonpacing-logo-transparente.png"
+          src="/logo-removed.png"
           alt="Triatlón pacing"
           className="hero-image fade-up delay-1"
         />
