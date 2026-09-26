@@ -40,6 +40,17 @@ body {
   overflow: hidden;
   border-bottom: 1px solid var(--border-soft);
 }
+
+.hero-image {
+  max-width: 440px;
+  width: 200%;
+  height: 120%;
+  max-height: 300px;
+  border-radius: 16px;
+  margin: 0 auto 20px;
+  display: block;
+}
+
 .hero::before {
   content: '';
   position: absolute;

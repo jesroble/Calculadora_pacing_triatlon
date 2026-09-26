@@ -9,8 +9,7 @@ export const translations = {
     },
     hero: {
       badge: 'Herramienta Profesional Gratuita',
-      titleLine1: 'Calculadora de',
-      titleLine2: 'Pacing Triatlón',
+      titleLine1: 'Calculadora de Pacing Triatlón',
       subtitle: 'Ironman 70.3 · Ironman Full',
       authorPrefix: 'Creada por',
       authorRole: 'Entrenador Nacional de Triatlón y Natación',
@@ -213,13 +212,10 @@ export const translations = {
     },
     hero: {
       badge: 'Free Professional Tool',
-      titleLine1: 'Triathlon',
-      titleLine2: 'Pacing Calculator',
+      titleLine1: 'Triathlon Pacing Calculator',
       subtitle: 'Ironman 70.3 · Ironman Full',
       authorPrefix: 'Created by',
       authorRole: 'National Triathlon & Swimming Coach',
-      bizumAlt: 'Bizum logo',
-      bizumText: 'If this tool helps you, you can buy me a coffee or contribute via Bizum ·',
     },
     athlete: {
       sectionLabel: 'Athlete Data',

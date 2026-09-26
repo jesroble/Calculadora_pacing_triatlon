@@ -340,18 +340,34 @@ export default function App() {
             >{l.toUpperCase()}</button>
           ))}
         </div>
-        <div className="hero-tag fade-up delay-1">{t('hero.badge')}</div>
+            <div className="hero-tag fade-up delay-1">{t('hero.badge')}</div>
+        <img
+          src="/triatlonpacing-logo-transparente.png"
+          alt="Triatlón pacing"
+          className="hero-image fade-up delay-1"
+        />
         <h1 className="fade-up delay-1">
-          {t('hero.titleLine1')}<br /><span>{t('hero.titleLine2')}</span>
+          {t('hero.titleLine1')}<br />
         </h1>
         <p className="hero-sub fade-up delay-2">{t('hero.subtitle')}</p>
         <p className="hero-author fade-up delay-2">
           {t('hero.authorPrefix')} <strong><a href="https://entrenador-deportes-cicl-h5zi3vi.gamma.site/#card-9bg9tkkaby8ezxr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none' }}>Pablo Iglesias Navarrete</a></strong><br />
           {t('hero.authorRole')}
         </p>
-        <p className="hero-bizum fade-up delay-2">
-          <img src="/bizum-logo.svg" alt={t('hero.bizumAlt')} style={{ width: '48px', height: '48px', verticalAlign: 'middle', marginLeft: '8px', marginRight: '8px'}} /> {t('hero.bizumText')} <strong><a href="tel:+34600254690" style={{ color: 'inherit', textDecoration: 'underline' }}>600 254 690</a></strong>
-        </p>
+        <a
+          href="https://www.instagram.com/pabloiglesiasnavarrete/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="cta-btn"
+          style={{ background: '#E1306C', marginTop: '12px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="20" height="20" rx="5" stroke="white" strokeWidth="2"/>
+            <circle cx="12" cy="12" r="4.5" stroke="white" strokeWidth="2"/>
+            <circle cx="17.5" cy="6.5" r="1.2" fill="white"/>
+          </svg>
+          Follow on Instagram
+        </a>
         <InstallPWA />
       </header>
 
