@@ -26,7 +26,7 @@ function parseFormUrl(raw, name) {
   return null
 }
 
-const FORM_URL = parseFormUrl(import.meta.env.BREVO_FORM_ACTION_URL, 'VITE_BREVO_FORM_ACTION_URL')
+const FORM_URL = parseFormUrl(import.meta.env.VITE_BREVO_FORM_ACTION_URL,'VITE_BREVO_FORM_ACTION_URL')
 
 // Página estática en privacidad/index.html (también enlazada desde el footer)
 export const PRIVACY_POLICY_URL = '/privacidad/'
