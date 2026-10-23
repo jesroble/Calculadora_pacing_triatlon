@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { fileURLToPath } from 'node:url'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -8,8 +9,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: 'index.html',
-        privacidad: 'privacidad/index.html',
+        main: fileURLToPath(new URL('index.html', import.meta.url)),
+        privacidad: fileURLToPath(new URL('privacidad/index.html', import.meta.url)),
       },
     },
   },

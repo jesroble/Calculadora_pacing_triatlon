@@ -1,15 +1,13 @@
-// Suscripción a la newsletter mediante el formulario oficial de Brevo.
+// Newsletter: formulario alojado por Brevo, incrustado en un <iframe>.
 // El doble opt-in se activa y se aplica en el panel de Brevo (formulario con
-// "Doble confirmación"): aquí solo se envía el email al endpoint del formulario,
-// igual que hace el script oficial de Brevo (POST a `action?isAjax=1`).
+// "Doble confirmación"); el email se escribe dentro del iframe y la web nunca lo ve.
 //
-// La URL `action` del formulario es pública (aparece en el HTML que genera Brevo).
+// La URL del formulario es pública (es el src del iframe que genera Brevo).
 // NO es una clave API. Nunca pongas una API key de Brevo en VITE_* ni en el repo:
 // todo lo que empieza por VITE_ acaba en el navegador.
 
 const BREVO_HOST_RE = /^([a-z0-9-]+\.)*sibforms\.com$/i
-const EMAIL_RE = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/
-const PROMPT_KEY = 'triatlonpacing:newsletterPrompt' // sessionStorage: 'dismissed' | 'requested'
+const PROMPT_KEY = 'triatlonpacing:newsletterPrompt' // sessionStorage: 'dismissed'
 
 function parseFormUrl(raw, name) {
   if (!raw) return null
@@ -26,33 +24,13 @@ function parseFormUrl(raw, name) {
   return null
 }
 
-const FORM_URL = parseFormUrl(import.meta.env.VITE_BREVO_FORM_ACTION_URL,'VITE_BREVO_FORM_ACTION_URL')
+export const FORM_URL = parseFormUrl(import.meta.env.VITE_BREVO_FORM_ACTION_URL, 'VITE_BREVO_FORM_ACTION_URL')
 
 // Página estática en privacidad/index.html (también enlazada desde el footer)
 export const PRIVACY_POLICY_URL = '/privacidad/'
 
 // Sin formulario de Brevo configurado no se muestra nada en producción.
 export const NEWSLETTER_ENABLED = Boolean(FORM_URL)
-
-export function isValidEmail(value) {
-  return value.length <= 254 && EMAIL_RE.test(value)
-}
-
-// Resuelve si Brevo acepta la solicitud (el contacto queda pendiente de confirmar
-// por email) y lanza un error en cualquier otro caso. Solo se envía el email: ningún
-// dato de la calculadora.
-export async function requestSubscription({ email, lang, honeypot }) {
-  if (!FORM_URL) throw new Error('newsletter-not-configured')
-
-  const body = new FormData()
-  body.append('EMAIL', email)
-  body.append('email_address_check', honeypot) // campo trampa anti-bots que espera Brevo
-  body.append('locale', lang)
-
-  const res = await fetch(`${FORM_URL}?isAjax=1`, { method: 'POST', body, credentials: 'omit' })
-  const data = await res.json().catch(() => null)
-  if (!res.ok || data?.success !== true) throw new Error('newsletter-rejected')
-}
 
 // Preferencia de la sesión actual para no repetir el pop-up. sessionStorage se borra
 // al cerrar la pestaña, no se envía a ningún servidor y no guarda el email.
