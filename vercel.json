@@ -1,0 +1,5 @@
+{
+  "redirects": [
+    { "source": "/privacidad", "destination": "/privacidad/", "permanent": true }
+  ]
+}

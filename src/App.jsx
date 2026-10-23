@@ -3,6 +3,7 @@ import InstallPWA from './InstallPWA.jsx'
 import ReloadPrompt from './ReloadPrompt.jsx'
 import Icon from './Icons.jsx'
 import SEO from './SEO.jsx'
+import { NewsletterSection, NewsletterPopup } from './Newsletter.jsx'
 import { generateShareImageBlob } from './shareImage.js'
 import { Analytics } from '@vercel/analytics/react'
 import { useLanguage } from './i18n/LanguageContext.js'
@@ -843,6 +844,9 @@ export default function App() {
           </a>
         </section>
 
+        {/* NEWSLETTER */}
+        <NewsletterSection />
+
         {/* FAQ */}
         <section aria-labelledby="faq-title" className="faq-section">
           <p className="section-label" id="faq-title">{t('faq.title')}</p>
@@ -870,8 +874,12 @@ export default function App() {
           <Icon name="phone" size={15} style={{ verticalAlign: 'middle' }} />
           <a href="tel:+34600254690" style={{ color: 'inherit', textDecoration: 'underline' }}>600 254 690</a> {t('footer.tagline')}
         </p>
+        <p style={{marginTop:'8px'}}>
+          <a href="/privacidad/" style={{ color: 'inherit', textDecoration: 'underline' }}>{t('footer.privacyLink')}</a>
+        </p>
       </footer>
 
+      <NewsletterPopup />
       <ReloadPrompt />
       <Analytics />
     </>

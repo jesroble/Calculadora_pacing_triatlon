@@ -126,6 +126,28 @@ export const translations = {
       linkAriaLabel: 'Visitar el blog de Pablo Iglesias Navarrete para ver tarifas y servicios',
       linkText: 'Ver Tarifas y Servicios',
     },
+    // La finalidad debe coincidir con privacidad/index.html
+    newsletter: {
+      title: 'Suscríbete a la newsletter',
+      intro: 'Recibe en tu correo información sobre entrenamiento, pacing y nutrición.',
+      emailLabel: 'Tu correo electrónico',
+      emailPlaceholder: 'nombre@ejemplo.com',
+      submit: 'Suscribirme',
+      sending: 'Enviando…',
+      invalidEmail: 'Introduce un correo electrónico válido, por ejemplo nombre@ejemplo.com.',
+      error: 'No hemos podido enviar tu solicitud. Comprueba tu conexión e inténtalo de nuevo en unos minutos.',
+      successTitle: 'Revisa tu correo para confirmar la suscripción',
+      successText: 'Si la dirección es correcta, recibirás un email de confirmación. La suscripción no estará activa hasta que pulses el enlace de ese correo. Si no lo ves, revisa la carpeta de spam o promociones.',
+      privacyNotice: 'Responsable: Pablo Iglesias Navarrete. Finalidad: enviarte la newsletter con información sobre entrenamiento, pacing y nutrición, y comunicaciones comerciales. Los datos se almacenan en Brevo. Puedes darte de baja en cualquier momento desde el enlace de cada correo.',
+      privacyLink: 'Política de privacidad',
+      newTab: ' (se abre en una pestaña nueva)',
+      popup: {
+        title: '¿Te ha servido la calculadora?',
+        text: 'Suscríbete a mi newsletter con tu email.',
+        closeAriaLabel: 'Cerrar invitación a la newsletter',
+        announce: 'Invitación a la newsletter disponible al final de la página. Pulsa Escape para cerrarla.',
+      },
+    },
     faq: {
       title: 'Preguntas Frecuentes',
       items: [
@@ -151,6 +173,7 @@ export const translations = {
       logoAlt: 'Logo Pablo Iglesias Navarrete — Entrenador Triatlón',
       copyrightSuffix: 'Pablo Iglesias Navarrete · Entrenador Nacional de Triatlón y Natación',
       tagline: '· Herramienta gratuita de pacing para triatlón',
+      privacyLink: 'Política de privacidad',
     },
     share: {
       textHeaderPrefix: 'Pacing',
@@ -327,6 +350,27 @@ export const translations = {
       linkAriaLabel: "Visit Pablo Iglesias Navarrete's site to see rates and services",
       linkText: 'See Rates & Services',
     },
+    newsletter: {
+      title: "Pablo's Newsletter",
+      intro: 'Get training, pacing and nutrition information delivered to your inbox.',
+      emailLabel: 'Your email address',
+      emailPlaceholder: 'name@example.com',
+      submit: 'Subscribe',
+      sending: 'Sending…',
+      invalidEmail: 'Please enter a valid email address, e.g. name@example.com.',
+      error: "We couldn't send your request. Please check your connection and try again in a few minutes.",
+      successTitle: 'Check your inbox to confirm your subscription',
+      successText: "If the address is correct, you'll receive a confirmation email. Your subscription won't be active until you click the link in that email. If you can't find it, check your spam or promotions folder.",
+      privacyNotice: 'Controller: Pablo Iglesias Navarrete. Purpose: sending you the newsletter with training, pacing and nutrition information, and commercial communications. Data is stored in Brevo. You can unsubscribe at any time using the link in every email.',
+      privacyLink: 'Privacy policy (in Spanish)',
+      newTab: ' (opens in a new tab)',
+      popup: {
+        title: 'Did the calculator help?',
+        text: "Subscribe to Pablo's newsletter with your email.",
+        closeAriaLabel: 'Close newsletter invitation',
+        announce: 'Newsletter invitation available at the bottom of the page. Press Escape to close it.',
+      },
+    },
     faq: {
       title: 'Frequently Asked Questions',
       items: [
@@ -352,6 +396,7 @@ export const translations = {
       logoAlt: 'Pablo Iglesias Navarrete logo — Triathlon Coach',
       copyrightSuffix: 'Pablo Iglesias Navarrete · National Triathlon & Swimming Coach',
       tagline: '· Free triathlon pacing tool',
+      privacyLink: 'Privacy policy (in Spanish)',
     },
     share: {
       textHeaderPrefix: 'Pacing',

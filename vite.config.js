@@ -4,6 +4,15 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // Páginas HTML: la calculadora (SPA) y la política de privacidad (estática)
+  build: {
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+        privacidad: 'privacidad/index.html',
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({
@@ -34,6 +43,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        // Páginas estáticas fuera de la SPA: no responder con index.html
+        navigateFallbackDenylist: [/^\/privacidad/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,

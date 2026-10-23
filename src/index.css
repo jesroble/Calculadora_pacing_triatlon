@@ -471,6 +471,102 @@ body {
 .alert-card { display: flex; align-items: flex-start; gap: 12px; background: #191409; border: 1px solid rgba(255,180,0,0.3); border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; font-size: 0.95rem; color: #ffd166; line-height: 1.5; }
 .alert-card svg { flex-shrink: 0; margin-top: 2px; }
 
+/* ===== Newsletter (Brevo) ===== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.newsletter-card { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 14px; padding: 28px; margin-bottom: 24px; }
+.newsletter-card .results-title { margin-bottom: 8px; }
+.newsletter-card .title-icon { color: var(--accent); }
+.newsletter-card__intro { color: var(--muted); font-size: 1rem; margin-bottom: 18px; }
+.newsletter-card--dev { border-style: dashed; border-left-style: solid; border-left-color: #ffd166; color: #ffd166; font-size: 0.9rem; }
+.newsletter-form__row { display: flex; gap: 10px; }
+.newsletter-form__row input { flex: 1; min-width: 0; }
+.newsletter-form .field input[aria-invalid="true"] { border-color: #ff7a6b; }
+@media (max-width: 480px) { .newsletter-form__row { flex-direction: column; } }
+.newsletter-btn {
+  flex-shrink: 0;
+  background: var(--accent);
+  color: var(--black);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 22px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.newsletter-btn:hover { background: var(--accent-strong); }
+.newsletter-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.newsletter-btn[aria-disabled="true"] { opacity: 0.6; cursor: wait; }
+.newsletter-honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.newsletter-msg { font-size: 0.92rem; margin-top: 10px; line-height: 1.5; }
+.newsletter-msg--error { color: #ff7a6b; }
+.newsletter-msg--success { background: rgba(46,207,127,0.08); border: 1px solid rgba(46,207,127,0.35); border-radius: 10px; padding: 14px 16px; color: var(--text); }
+.newsletter-msg--success strong { color: var(--green); display: block; margin-bottom: 4px; }
+.newsletter-msg--success:focus { outline: none; }
+.newsletter-msg--success:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.newsletter-privacy { font-size: 0.8rem; color: var(--muted); margin-top: 12px; line-height: 1.5; }
+.newsletter-privacy a { color: var(--accent); }
+
+@keyframes newsletter-popup-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.newsletter-popup {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: min(380px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: 14px;
+  padding: 20px 20px 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  z-index: 9998;
+  animation: newsletter-popup-in 0.3s ease;
+}
+.newsletter-popup__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 10px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.newsletter-popup__close:hover { color: var(--text); background: var(--card2); }
+.newsletter-popup__close:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.newsletter-popup__title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 800; letter-spacing: 0.3px; margin: 0 36px 4px 0; }
+.newsletter-popup__text { font-size: 0.92rem; color: var(--muted); margin-bottom: 12px; }
+.newsletter-popup .newsletter-form__row { flex-direction: column; }
+@media (max-width: 540px) {
+  .newsletter-popup { left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); width: auto; max-height: calc(100vh - 24px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .newsletter-popup { animation: none; }
+}
+
 .faq-section { margin-bottom: 24px; }
 .faq-item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin-bottom: 10px; }
 .faq-q {
